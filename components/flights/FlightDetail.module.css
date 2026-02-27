@@ -1,0 +1,125 @@
+.card {
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(26, 39, 68, 0.08);
+  box-shadow: var(--shadow-subtle);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.routeFlags {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.flag {
+  font-size: 1.75rem;
+}
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: var(--radius-full);
+}
+
+.tagGreen {
+  background-color: var(--color-tag-green-bg);
+  color: var(--color-tag-green);
+}
+
+.tagYellow {
+  background-color: var(--color-tag-yellow-bg);
+  color: var(--color-tag-yellow);
+}
+
+.airlineCenter {
+  text-align: center;
+  padding: 0 var(--space-2);
+}
+
+.connectorLine {
+  font-size: 0.875rem;
+  color: var(--color-text-subtle);
+}
+
+.airlineLabel {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid rgba(26, 39, 68, 0.06);
+  font-size: 0.8125rem;
+}
+
+.rowLabel {
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.rowValue {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.searchSection {
+  margin-top: var(--space-4);
+}
+
+.searchTitle {
+  font-weight: 700;
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+}
+
+.searchLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-muted);
+  border: 1px solid rgba(26, 39, 68, 0.08);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  color: var(--color-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.searchLink:hover {
+  background-color: var(--color-primary-muted);
+}
+
+.searchLinkMeta {
+  font-size: 0.6875rem;
+  color: var(--color-text-subtle);
+}

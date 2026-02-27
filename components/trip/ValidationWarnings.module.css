@@ -1,0 +1,40 @@
+.wrapper {
+  background: linear-gradient(135deg, var(--color-bg-muted) 0%, rgba(251, 247, 240, 0.4) 100%);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(26, 39, 68, 0.08);
+  padding: var(--space-5);
+}
+
+.title {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.card {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid rgba(26, 39, 68, 0.08);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.msg {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}

@@ -1,0 +1,47 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+.main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.breadcrumbLink {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.breadcrumbLink:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbSep {
+  color: var(--color-text-subtle);
+}
+
+.notFound {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.backLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}

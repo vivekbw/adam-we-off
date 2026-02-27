@@ -1,0 +1,68 @@
+/**
+ * We Off — Travel Planning App Design System
+ * Aesthetic: Travel-editorial, warm and adventurous
+ * (Monocle magazine meets Airbnb)
+ */
+
+:root {
+  /* Typography */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Colors */
+  --color-primary: #C2491D;
+  --color-primary-hover: #A33E18;
+  --color-primary-muted: rgba(194, 73, 29, 0.12);
+
+  --color-navy: #1A2744;
+  --color-text: #1A2744;
+  --color-text-muted: rgba(26, 39, 68, 0.7);
+  --color-text-subtle: rgba(26, 39, 68, 0.5);
+
+  --color-bg: #FBF7F0;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-muted: rgba(251, 247, 240, 0.6);
+
+  /* Status tag accents */
+  --color-tag-green: #2D6A4F;
+  --color-tag-green-bg: rgba(45, 106, 79, 0.12);
+  --color-tag-yellow: #B8860B;
+  --color-tag-yellow-bg: rgba(184, 134, 11, 0.12);
+  --color-tag-blue: #1A2744;
+  --color-tag-blue-bg: rgba(26, 39, 68, 0.08);
+  --color-tag-red: #9B2226;
+  --color-tag-red-bg: rgba(155, 34, 38, 0.12);
+
+  /* Spacing scale (4px base) */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-subtle: 0 1px 3px rgba(26, 39, 68, 0.06);
+  --shadow-medium: 0 4px 12px rgba(26, 39, 68, 0.08);
+  --shadow-elevated: 0 12px 40px rgba(26, 39, 68, 0.12);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+}

@@ -1,0 +1,139 @@
+/**
+ * We Off — Global Styles
+ * Travel-editorial design system
+ */
+
+@import "./variables.css";
+
+/* Font imports */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&display=swap");
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap");
+
+/* Reset & base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  line-height: 1.6;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-muted);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-subtle);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-primary-muted);
+  color: var(--color-text);
+}
+
+/* Focus-visible for accessibility */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Keyframe: fade-in */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Utility: tag base */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+
+.tag:hover {
+  opacity: 0.9;
+}
+
+.tag-green {
+  color: var(--color-tag-green);
+  background-color: var(--color-tag-green-bg);
+}
+
+.tag-yellow {
+  color: var(--color-tag-yellow);
+  background-color: var(--color-tag-yellow-bg);
+}
+
+.tag-blue {
+  color: var(--color-tag-blue);
+  background-color: var(--color-tag-blue-bg);
+}
+
+.tag-red {
+  color: var(--color-tag-red);
+  background-color: var(--color-tag-red-bg);
+}
+
+/* Utility: card */
+.card {
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle);
+  padding: var(--space-6);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+/* Utility: hover-up */
+.hover-up {
+  transition: transform var(--transition-base);
+}
+
+.hover-up:hover {
+  transform: translateY(-2px);
+}

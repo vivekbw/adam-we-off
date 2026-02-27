@@ -1,0 +1,35 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  transition: opacity var(--transition-fast);
+}
+
+.tag:hover {
+  opacity: 0.9;
+}
+
+.green {
+  color: var(--color-tag-green);
+  background-color: var(--color-tag-green-bg);
+}
+
+.yellow {
+  color: var(--color-tag-yellow);
+  background-color: var(--color-tag-yellow-bg);
+}
+
+.blue {
+  color: var(--color-tag-blue);
+  background-color: var(--color-tag-blue-bg);
+}
+
+.red {
+  color: var(--color-tag-red);
+  background-color: var(--color-tag-red-bg);
+}

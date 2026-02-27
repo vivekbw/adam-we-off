@@ -1,0 +1,155 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+.main {
+  padding: var(--space-8) var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-6);
+}
+
+.tripCard {
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.tripCard:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.tripLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background-color: var(--color-bg-muted);
+}
+
+.coverImg {
+  object-fit: cover;
+}
+
+.content {
+  padding: var(--space-5);
+}
+
+.tripTitle {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
+.dates {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.buddies {
+  display: flex;
+  margin-bottom: var(--space-4);
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  border: 2px solid var(--color-bg-elevated);
+  margin-left: -6px;
+}
+
+.avatar:first-child {
+  margin-left: 0;
+}
+
+.cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cityTag {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+}
+
+.newTripCard {
+  background-color: transparent;
+  border: 2px dashed var(--color-text-subtle);
+  border-radius: var(--radius-lg);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-base), background-color var(--transition-base);
+}
+
+.newTripCard:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-muted);
+}
+
+.newTripLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-text-muted);
+  padding: var(--space-6);
+}
+
+.newTripCard:hover .newTripLink {
+  color: var(--color-primary);
+}
+
+.plus {
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.newTripLabel {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
