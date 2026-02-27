@@ -1,7 +1,8 @@
 .sidebar {
-  background-color: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(26, 39, 68, 0.08);
   padding: var(--space-5);
   position: sticky;
   top: 72px;
@@ -17,7 +18,7 @@
 
 .title {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 0.9375rem;
   color: var(--color-text);
 }
@@ -35,8 +36,9 @@
 }
 
 .segment {
-  background-color: var(--color-bg-elevated);
-  border: 1px solid rgba(26, 39, 68, 0.08);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   box-shadow: var(--shadow-subtle);
@@ -87,7 +89,7 @@
 .editInput {
   width: 56px;
   padding: var(--space-1) var(--space-2);
-  border: 1px solid rgba(26, 39, 68, 0.15);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.8125rem;
   text-align: center;
@@ -102,7 +104,7 @@
 
 .editDateInput {
   padding: var(--space-1) var(--space-2);
-  border: 1px solid rgba(26, 39, 68, 0.15);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.6875rem;
   font-family: var(--font-body);
@@ -173,7 +175,7 @@
   font-family: var(--font-body);
   background-color: var(--color-primary);
   border: none;
-  color: var(--color-bg);
+  color: #FFFFFF;
 }
 
 .btnGroup {
@@ -184,7 +186,7 @@
 .buddiesSection {
   margin-top: var(--space-4);
   padding-top: var(--space-4);
-  border-top: 1px solid rgba(26, 39, 68, 0.06);
+  border-top: 1px solid var(--color-border);
 }
 
 .buddiesTitle {
@@ -207,7 +209,7 @@
   align-items: center;
   gap: var(--space-1);
   background-color: var(--color-bg-muted);
-  border: 1px solid rgba(26, 39, 68, 0.08);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   padding: var(--space-1) var(--space-3);
 }

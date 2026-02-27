@@ -8,7 +8,7 @@
 
 .title {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 1.5rem;
   color: var(--color-text);
 }
@@ -32,7 +32,7 @@
   font-weight: 500;
   background: var(--color-bg-elevated);
   color: var(--color-text);
-  border: 1px solid rgba(26, 39, 68, 0.1);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -61,7 +61,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-4);
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 1.125rem;
   color: var(--color-text);
 }

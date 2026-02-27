@@ -10,7 +10,7 @@
   font-size: 0.9375rem;
   font-weight: 600;
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: #FFFFFF;
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -23,8 +23,9 @@
 }
 
 .card {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-text-subtle);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   transition: box-shadow var(--transition-base);
@@ -44,7 +45,7 @@
 
 .description {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 1rem;
   color: var(--color-text);
 }
@@ -72,7 +73,7 @@
 
 .editBtn:hover {
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: #FFFFFF;
 }
 
 .deleteBtn {
@@ -82,7 +83,7 @@
 
 .deleteBtn:hover {
   background: var(--color-tag-red);
-  color: var(--color-bg);
+  color: #FFFFFF;
 }
 
 .amount {
@@ -123,7 +124,7 @@
   padding: var(--space-2) var(--space-3);
   font-family: var(--font-body);
   font-size: 0.9375rem;
-  border: 1px solid var(--color-text-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg);
 }
@@ -146,7 +147,7 @@
   font-weight: 500;
   background: var(--color-bg-muted);
   color: var(--color-text);
-  border: 1px solid var(--color-text-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -171,7 +172,7 @@
 
 .addForm {
   background: var(--color-bg-muted);
-  border: 2px dashed var(--color-text-subtle);
+  border: 2px dashed var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   display: flex;
@@ -184,7 +185,7 @@
   padding: var(--space-2) var(--space-3);
   font-family: var(--font-body);
   font-size: 0.9375rem;
-  border: 1px solid var(--color-text-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg);
 }

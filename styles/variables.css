@@ -1,39 +1,59 @@
 /**
- * We Off — Travel Planning App Design System
- * Aesthetic: Travel-editorial, warm and adventurous
- * (Monocle magazine meets Airbnb)
+ * We Off — Design System
+ * Adapted from GrokSDR "Arctic Frost" light theme
+ * Fonts: Instrument Serif (display) + Figtree (body)
+ * Glass-first surfaces with clean light aesthetic
  */
 
 :root {
   /* Typography */
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
-  --font-body: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-figtree), -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Colors */
-  --color-primary: #C2491D;
-  --color-primary-hover: #A33E18;
-  --color-primary-muted: rgba(194, 73, 29, 0.12);
-
-  --color-navy: #1A2744;
-  --color-text: #1A2744;
-  --color-text-muted: rgba(26, 39, 68, 0.7);
-  --color-text-subtle: rgba(26, 39, 68, 0.5);
-
-  --color-bg: #FBF7F0;
+  /* ── Backgrounds ── */
+  --color-bg: #F8FAFC;
+  --color-bg-secondary: #F1F5F9;
+  --color-bg-tertiary: #E8EDF2;
   --color-bg-elevated: #FFFFFF;
-  --color-bg-muted: rgba(251, 247, 240, 0.6);
+  --color-bg-hover: #E2E8F0;
+  --color-bg-muted: rgba(241, 245, 249, 0.6);
 
-  /* Status tag accents */
-  --color-tag-green: #2D6A4F;
-  --color-tag-green-bg: rgba(45, 106, 79, 0.12);
-  --color-tag-yellow: #B8860B;
-  --color-tag-yellow-bg: rgba(184, 134, 11, 0.12);
-  --color-tag-blue: #1A2744;
-  --color-tag-blue-bg: rgba(26, 39, 68, 0.08);
-  --color-tag-red: #9B2226;
-  --color-tag-red-bg: rgba(155, 34, 38, 0.12);
+  /* ── Text ── */
+  --color-text: #0F172A;
+  --color-text-muted: #475569;
+  --color-text-subtle: #94A3B8;
 
-  /* Spacing scale (4px base) */
+  /* ── Accent (Blue-600 primary) ── */
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-muted: rgba(37, 99, 235, 0.08);
+  --color-accent: #2563EB;
+  --color-accent-dim: #1D4ED8;
+  --color-accent-glow: rgba(37, 99, 235, 0.08);
+
+  /* ── Status Colors ── */
+  --color-tag-green: #10B981;
+  --color-tag-green-bg: rgba(16, 185, 129, 0.08);
+  --color-tag-yellow: #F59E0B;
+  --color-tag-yellow-bg: rgba(245, 158, 11, 0.08);
+  --color-tag-blue: #6366F1;
+  --color-tag-blue-bg: rgba(99, 102, 241, 0.08);
+  --color-tag-red: #F43F5E;
+  --color-tag-red-bg: rgba(244, 63, 94, 0.08);
+
+  --status-booked: #10B981;
+  --status-considering: #F59E0B;
+  --status-need-to-book: #F43F5E;
+  --status-new: #6366F1;
+
+  /* ── Borders ── */
+  --color-border: #E2E8F0;
+  --color-border-secondary: #CBD5E1;
+
+  /* Legacy aliases (used by existing modules) */
+  --color-navy: #0F172A;
+
+  /* ── Spacing scale (4px base) ── */
   --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
@@ -48,20 +68,27 @@
   --space-20: 80px;
   --space-24: 96px;
 
-  /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* ── Border radius ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-subtle: 0 1px 3px rgba(26, 39, 68, 0.06);
-  --shadow-medium: 0 4px 12px rgba(26, 39, 68, 0.08);
-  --shadow-elevated: 0 12px 40px rgba(26, 39, 68, 0.12);
+  /* ── Shadows (light theme) ── */
+  --shadow-subtle: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-medium: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-elevated: 0 12px 40px rgba(15, 23, 42, 0.12);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
 
-  /* Transitions */
+  /* ── Glass surfaces ── */
+  --glass-from: rgba(255, 255, 255, 0.9);
+  --glass-to: rgba(241, 245, 249, 0.75);
+  --topbar-bg: rgba(248, 250, 252, 0.88);
+  --grid-dot: #E2E8F0;
+
+  /* ── Transitions ── */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 400ms ease;

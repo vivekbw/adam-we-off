@@ -43,7 +43,7 @@ export function ProgressRing({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="var(--color-bg-muted)"
+            stroke="var(--color-bg-tertiary)"
             strokeWidth={strokeWidth}
           />
           <circle

@@ -1,6 +1,20 @@
 import type { Metadata, Viewport } from 'next';
+import { Instrument_Serif, Figtree } from 'next/font/google';
 import { Toaster } from 'sonner';
 import '@/styles/globals.css';
+
+const instrumentSerif = Instrument_Serif({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-instrument-serif',
+  display: 'swap',
+});
+
+const figtree = Figtree({
+  subsets: ['latin'],
+  variable: '--font-figtree',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'We Off — Travel Planner',
@@ -8,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#1A2744',
+  themeColor: '#F8FAFC',
 };
 
 export default function RootLayout({
@@ -17,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${instrumentSerif.variable} ${figtree.variable}`}>
       <body>
         <div style={{ minHeight: '100vh' }}>{children}</div>
         <Toaster

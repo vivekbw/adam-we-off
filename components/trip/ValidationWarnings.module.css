@@ -1,7 +1,7 @@
 .wrapper {
   background: linear-gradient(135deg, var(--color-bg-muted) 0%, rgba(251, 247, 240, 0.4) 100%);
   border-radius: var(--radius-xl);
-  border: 1px solid rgba(26, 39, 68, 0.08);
+  border: 1px solid var(--color-border);
   padding: var(--space-5);
 }
 
@@ -19,8 +19,9 @@
 }
 
 .card {
-  background-color: var(--color-bg-elevated);
-  border: 1px solid rgba(26, 39, 68, 0.08);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
   display: flex;

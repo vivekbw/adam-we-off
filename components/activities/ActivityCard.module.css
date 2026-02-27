@@ -1,5 +1,7 @@
 .card {
-  background: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-subtle);
@@ -36,7 +38,7 @@
 
 .name {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 1rem;
   color: var(--color-text);
 }

@@ -8,7 +8,7 @@
 
 .title {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 1.5rem;
   color: var(--color-text);
 }
@@ -29,7 +29,9 @@
   gap: var(--space-4);
   margin-bottom: var(--space-8);
   padding: var(--space-4);
-  background: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-subtle);
 }
@@ -76,7 +78,7 @@
   font-weight: 500;
   background: var(--color-bg-muted);
   color: var(--color-text);
-  border: 1px solid rgba(26, 39, 68, 0.1);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -104,7 +106,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-4);
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 1.125rem;
   color: var(--color-text);
 }

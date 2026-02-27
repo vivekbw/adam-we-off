@@ -6,11 +6,11 @@
 }
 
 .toggleBtn {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: #FFFFFF;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
@@ -31,26 +31,27 @@
 
 .panel {
   position: absolute;
-  bottom: calc(56px + var(--space-3));
+  bottom: calc(52px + var(--space-3));
   right: 0;
   width: 380px;
   max-width: calc(100vw - var(--space-12));
   max-height: 500px;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-elevated);
   overflow: hidden;
-  border: 1px solid var(--color-text-subtle);
+  border: 1px solid var(--color-border);
 }
 
 .header {
   padding: var(--space-4);
-  border-bottom: 1px solid var(--color-text-subtle);
+  border-bottom: 1px solid var(--color-border);
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 400;
+  font-size: 1.0625rem;
   color: var(--color-text);
 }
 
@@ -59,16 +60,16 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   padding: var(--space-3);
-  border-bottom: 1px solid var(--color-text-subtle);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .contextBtn {
   padding: var(--space-1) var(--space-3);
   font-size: 0.75rem;
   font-weight: 500;
-  background: var(--color-bg-muted);
-  color: var(--color-text);
-  border: 1px solid var(--color-text-subtle);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -94,26 +95,27 @@
   max-width: 85%;
   padding: var(--space-3);
   border-radius: var(--radius-md);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
 .messageUser {
   align-self: flex-end;
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: #FFFFFF;
 }
 
 .messageAssistant {
   align-self: flex-start;
-  background: var(--color-bg-muted);
+  background: var(--color-bg-secondary);
   color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
 .loading {
   align-self: flex-start;
   padding: var(--space-3);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
   font-style: italic;
 }
@@ -122,19 +124,20 @@
   display: flex;
   gap: var(--space-2);
   padding: var(--space-3);
-  border-top: 1px solid var(--color-text-subtle);
+  border-top: 1px solid var(--color-border);
 }
 
 .input {
   flex: 1;
   padding: var(--space-2) var(--space-3);
   font-family: var(--font-body);
-  font-size: 0.9375rem;
-  border: 1px solid var(--color-text-subtle);
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-bg);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
   resize: none;
-  min-height: 40px;
+  min-height: 36px;
   max-height: 120px;
 }
 
@@ -145,10 +148,10 @@
 
 .sendBtn {
   padding: var(--space-2) var(--space-4);
-  font-size: 0.9375rem;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
   background: var(--color-primary);
-  color: var(--color-bg);
+  color: #FFFFFF;
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;

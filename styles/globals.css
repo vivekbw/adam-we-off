@@ -1,13 +1,9 @@
 /**
  * We Off — Global Styles
- * Travel-editorial design system
+ * GrokSDR-inspired light theme design system
  */
 
 @import "./variables.css";
-
-/* Font imports */
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&display=swap");
-@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap");
 
 /* Reset & base */
 *,
@@ -31,17 +27,22 @@ html {
 
 body {
   line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-bg-hover) transparent;
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-muted);
-  border-radius: var(--radius-full);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -59,7 +60,7 @@ body {
   color: var(--color-text);
 }
 
-/* Focus-visible for accessibility */
+/* Focus */
 :focus {
   outline: none;
 }
@@ -69,7 +70,96 @@ body {
   outline-offset: 2px;
 }
 
-/* Keyframe: fade-in */
+/* ── Dot Grid Background ── */
+.bg-grid {
+  background-image: radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Glass Card (primary surface) ── */
+.glass-card {
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* ── Ambient Pulse (AI / processing) ── */
+@keyframes ambient-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.06);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.12);
+  }
+}
+
+.ai-processing {
+  animation: ambient-pulse 2s ease-in-out infinite;
+}
+
+/* ── Stagger Children Animation ── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-up 0.4s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* ── Grain Overlay ── */
+.grain-overlay {
+  position: relative;
+}
+
+.grain-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .stagger-children > * {
+    opacity: 1;
+    animation: none;
+  }
+  .ai-processing {
+    animation: none;
+  }
+}
+
+/* ── Keyframe: fade-in ── */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -79,15 +169,15 @@ body {
   }
 }
 
-/* Utility: tag base */
+/* ── Utility: tag base ── */
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: var(--space-1) var(--space-3);
+  gap: 4px;
+  padding: 3px 10px;
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
   border-radius: var(--radius-sm);
   transition: opacity var(--transition-fast);
 }
@@ -116,20 +206,22 @@ body {
   background-color: var(--color-tag-red-bg);
 }
 
-/* Utility: card */
+/* ── Utility: card ── */
 .card {
-  background-color: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-subtle);
-  padding: var(--space-6);
-  transition: box-shadow var(--transition-base), transform var(--transition-base);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow var(--transition-base);
 }
 
 .card:hover {
   box-shadow: var(--shadow-medium);
 }
 
-/* Utility: hover-up */
+/* ── Utility: hover-up ── */
 .hover-up {
   transition: transform var(--transition-base);
 }

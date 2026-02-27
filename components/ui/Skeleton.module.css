@@ -19,7 +19,9 @@
 }
 
 .cardSkeleton {
-  background-color: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-subtle);
   padding: var(--space-6);

@@ -3,9 +3,10 @@
   align-items: stretch;
   gap: 0;
   overflow-x: auto;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-elevated);
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--color-border);
   scrollbar-gutter: stable;
 }
 
@@ -27,7 +28,7 @@
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.1) 55%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.1) 55%);
 }
 
 .content {
@@ -44,8 +45,8 @@
 .cityName {
   color: #fff;
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 0.8125rem;
+  font-weight: 400;
+  font-size: 0.875rem;
   line-height: 1.2;
 }
 
@@ -69,11 +70,12 @@
   width: 28px;
   height: 28px;
   background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-medium);
+  box-shadow: var(--shadow-subtle);
   font-size: 0.875rem;
   color: var(--color-text);
   flex-shrink: 0;

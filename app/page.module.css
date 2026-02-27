@@ -12,9 +12,10 @@
 .heading {
   font-family: var(--font-display);
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--color-text);
   margin-bottom: var(--space-6);
+  letter-spacing: -0.02em;
 }
 
 .grid {
@@ -24,14 +25,17 @@
 }
 
 .tripCard {
-  background-color: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition: box-shadow var(--transition-base), transform var(--transition-base);
+  transition: border-color 0.3s ease, box-shadow var(--transition-base), transform var(--transition-base);
 }
 
 .tripCard:hover {
+  border-color: var(--color-primary);
   box-shadow: var(--shadow-medium);
   transform: translateY(-2px);
 }
@@ -46,7 +50,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  background-color: var(--color-bg-muted);
+  background-color: var(--color-bg-secondary);
 }
 
 .coverImg {
@@ -60,13 +64,14 @@
 .tripTitle {
   font-family: var(--font-display);
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--color-text);
   margin-bottom: var(--space-1);
+  letter-spacing: -0.01em;
 }
 
 .dates {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
   margin-bottom: var(--space-4);
 }
@@ -107,7 +112,7 @@
 
 .newTripCard {
   background-color: transparent;
-  border: 2px dashed var(--color-text-subtle);
+  border: 2px dashed var(--color-border);
   border-radius: var(--radius-lg);
   min-height: 200px;
   display: flex;

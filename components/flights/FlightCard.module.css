@@ -1,10 +1,11 @@
 .card {
-  background-color: var(--color-bg-elevated);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   margin-bottom: var(--space-3);
   cursor: pointer;
-  border: 1px solid rgba(26, 39, 68, 0.08);
   box-shadow: var(--shadow-subtle);
   transition: box-shadow var(--transition-base), transform var(--transition-base),
     border-color var(--transition-base);

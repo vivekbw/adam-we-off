@@ -16,9 +16,10 @@
 .heading {
   font-family: var(--font-display);
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--color-text);
   margin: 0 0 var(--space-2);
+  letter-spacing: -0.02em;
 }
 
 .dates {
@@ -55,17 +56,19 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4);
-  background: var(--color-bg-elevated);
-  border: 1px solid rgba(26, 39, 68, 0.12);
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 .sectionCard:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-1px);
 }
 
 .sectionEmoji {
@@ -74,9 +77,9 @@
 }
 
 .sectionLabel {
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.0625rem;
   color: var(--color-text);
 }
 
