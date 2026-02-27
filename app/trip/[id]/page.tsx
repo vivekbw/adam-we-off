@@ -1,21 +1,23 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
 import { TopBar } from '@/components/layout/TopBar';
 import { TimelineStrip } from '@/components/trip/TimelineStrip';
 import { TripPlanner } from '@/components/trip/TripPlanner';
 import { ValidationWarnings } from '@/components/trip/ValidationWarnings';
 import { ProgressRing } from '@/components/ui/ProgressRing';
+import { Input } from '@/components/ui/input';
 import { useItinerary } from '@/hooks/useTrip';
 import { useFlights } from '@/hooks/useFlights';
 import { useStays } from '@/hooks/useStays';
 import { useActivities } from '@/hooks/useActivities';
 import { useNotes } from '@/hooks/useNotes';
 import { useExpenses } from '@/hooks/useExpenses';
-import { useTripDetail } from '@/hooks/useTrips';
+import { useTripDetail, updateTrip } from '@/hooks/useTrips';
 import { fmtDate, daysBetween } from '@/lib/constants';
 import styles from './page.module.css';
 
@@ -32,12 +34,151 @@ const ChatPanel = dynamic(
   { ssr: false }
 );
 
+function EditableTripName({ tripId, name }: { tripId: string; name: string }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setValue(name);
+  }, [name]);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  async function save() {
+    setEditing(false);
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === name) {
+      setValue(name);
+      return;
+    }
+    const ok = await updateTrip(tripId, { name: trimmed });
+    if (!ok) {
+      toast.error('Failed to update trip name');
+      setValue(name);
+    }
+  }
+
+  if (editing) {
+    return (
+      <Input
+        ref={inputRef}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') save();
+          if (e.key === 'Escape') {
+            setValue(name);
+            setEditing(false);
+          }
+        }}
+        className="text-2xl font-serif"
+      />
+    );
+  }
+
+  return (
+    <h1
+      className={styles.heading}
+      onClick={() => setEditing(true)}
+      title="Click to edit trip name"
+      style={{ cursor: 'pointer' }}
+    >
+      {name}
+    </h1>
+  );
+}
+
+function EditableDates({ tripId, startDate, endDate }: { tripId: string; startDate: string | null; endDate: string | null }) {
+  const [editingStart, setEditingStart] = useState(false);
+  const [editingEnd, setEditingEnd] = useState(false);
+  const [start, setStart] = useState(startDate ?? '');
+  const [end, setEnd] = useState(endDate ?? '');
+
+  useEffect(() => {
+    setStart(startDate ?? '');
+  }, [startDate]);
+
+  useEffect(() => {
+    setEnd(endDate ?? '');
+  }, [endDate]);
+
+  async function saveStart() {
+    setEditingStart(false);
+    if (start !== (startDate ?? '')) {
+      const ok = await updateTrip(tripId, { start_date: start || null });
+      if (!ok) {
+        toast.error('Failed to update start date');
+        setStart(startDate ?? '');
+      }
+    }
+  }
+
+  async function saveEnd() {
+    setEditingEnd(false);
+    if (end !== (endDate ?? '')) {
+      const ok = await updateTrip(tripId, { end_date: end || null });
+      if (!ok) {
+        toast.error('Failed to update end date');
+        setEnd(endDate ?? '');
+      }
+    }
+  }
+
+  return (
+    <div className={styles.datesRow}>
+      {editingStart ? (
+        <Input
+          type="date"
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
+          onBlur={saveStart}
+          onKeyDown={(e) => e.key === 'Enter' && saveStart()}
+          className="w-40"
+          autoFocus
+        />
+      ) : (
+        <span
+          onClick={() => setEditingStart(true)}
+          className={styles.editableDate}
+          title="Click to edit start date"
+        >
+          {start ? fmtDate(start) : 'Set start date'}
+        </span>
+      )}
+      <span className={styles.dateSep}>–</span>
+      {editingEnd ? (
+        <Input
+          type="date"
+          value={end}
+          onChange={(e) => setEnd(e.target.value)}
+          onBlur={saveEnd}
+          onKeyDown={(e) => e.key === 'Enter' && saveEnd()}
+          className="w-40"
+          autoFocus
+        />
+      ) : (
+        <span
+          onClick={() => setEditingEnd(true)}
+          className={styles.editableDate}
+          title="Click to edit end date"
+        >
+          {end ? fmtDate(end) : 'Set end date'}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function TripPage() {
   const { id } = useParams() as { id: string };
-  const { trip } = useTripDetail(id);
+  const { trip, mutate: mutateTripDetail } = useTripDetail(id);
   const tripName = trip?.name ?? 'Loading…';
 
-  const { itinerary, updateItinerary } = useItinerary(id);
+  const { itinerary, updateItinerary, addSegment, removeSegment } = useItinerary(id);
   const { flights } = useFlights(id);
   const { stays } = useStays(id);
   const { activities } = useActivities(id);
@@ -105,7 +246,14 @@ export default function TripPage() {
       />
       <main className={styles.main}>
         <div className={styles.hero}>
-          <h1 className={styles.heading}>{tripName}</h1>
+          <EditableTripName tripId={id} name={tripName} />
+          {trip && (
+            <EditableDates
+              tripId={id}
+              startDate={trip.start_date}
+              endDate={trip.end_date}
+            />
+          )}
           <p className={styles.dates}>
             {itinerary.length > 0
               ? `${fmtDate(itinerary[0].startDate)} – ${fmtDate(itinerary[itinerary.length - 1].endDate)} · ${totalDays} days`
@@ -138,7 +286,12 @@ export default function TripPage() {
           </div>
 
           <div className={styles.right}>
-            <TripPlanner itinerary={itinerary} onSave={updateItinerary} />
+            <TripPlanner
+              itinerary={itinerary}
+              onSave={updateItinerary}
+              onAddSegment={addSegment}
+              onRemoveSegment={removeSegment}
+            />
           </div>
         </div>
       </main>

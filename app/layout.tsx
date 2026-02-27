@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Instrument_Serif, Figtree } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import '@/styles/globals.css';
 
 const instrumentSerif = Instrument_Serif({
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${instrumentSerif.variable} ${figtree.variable}`}>
       <body>
+        <TooltipProvider>
         <div style={{ minHeight: '100vh' }}>{children}</div>
         <Toaster
           position="bottom-left"
@@ -43,6 +45,7 @@ export default function RootLayout({
             },
           }}
         />
+        </TooltipProvider>
       </body>
     </html>
   );

@@ -26,9 +26,28 @@ function toFlight(row: Record<string, unknown>): Flight {
   };
 }
 
+function flightToRow(f: Flight, tripId: string) {
+  return {
+    id: f.id,
+    trip_id: tripId,
+    from: f.from,
+    from_code: f.fromCode,
+    to: f.to,
+    to_code: f.toCode,
+    from_flag: f.fromFlag,
+    to_flag: f.toFlag,
+    date: f.date,
+    dep: f.dep,
+    arr: f.arr,
+    airline: f.airline,
+    status: f.status,
+    seats: f.seats,
+    cost: f.cost,
+  };
+}
+
 async function fetchFlights(tripId: string): Promise<Flight[]> {
-  if (!isSupabaseConfigured) return SEED_FLIGHTS;
-  if (!supabase) return SEED_FLIGHTS;
+  if (!isSupabaseConfigured || !supabase) return SEED_FLIGHTS;
   const { data, error } = await supabase
     .from('flights')
     .select('*')
@@ -45,31 +64,64 @@ export function useFlights(tripId: string) {
     { fallbackData: SEED_FLIGHTS }
   );
 
-  const updateFlights = async (flights: Flight[]) => {
-    mutate(flights, false);
+  const flights = data ?? SEED_FLIGHTS;
+
+  const updateFlights = async (updated: Flight[]) => {
+    mutate(updated, false);
     if (isSupabaseConfigured && supabase) {
-      for (const f of flights) {
-        await supabase.from('flights').upsert({
-          id: f.id,
-          trip_id: tripId,
-          from: f.from,
-          from_code: f.fromCode,
-          to: f.to,
-          to_code: f.toCode,
-          from_flag: f.fromFlag,
-          to_flag: f.toFlag,
-          date: f.date,
-          dep: f.dep,
-          arr: f.arr,
-          airline: f.airline,
-          status: f.status,
-          seats: f.seats,
-          cost: f.cost,
-        });
+      for (const f of updated) {
+        await supabase.from('flights').upsert(flightToRow(f, tripId));
       }
       mutate();
     }
   };
 
-  return { flights: data ?? SEED_FLIGHTS, isLoading, error, updateFlights };
+  const addFlight = async (partial: Partial<Flight>) => {
+    const id = `fl-${Date.now()}`;
+    const newFlight: Flight = {
+      id,
+      from: partial.from ?? '',
+      fromCode: partial.fromCode ?? '',
+      to: partial.to ?? '',
+      toCode: partial.toCode ?? '',
+      fromFlag: partial.fromFlag ?? '',
+      toFlag: partial.toFlag ?? '',
+      date: partial.date ?? '',
+      dep: partial.dep ?? '',
+      arr: partial.arr ?? '',
+      airline: partial.airline ?? '',
+      status: partial.status ?? 'Need to Book',
+      seats: partial.seats ?? {},
+      cost: partial.cost ?? null,
+    };
+    const updated = [...flights, newFlight];
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('flights').insert(flightToRow(newFlight, tripId));
+      mutate();
+    }
+  };
+
+  const updateFlight = async (id: string, changes: Partial<Flight>) => {
+    const updated = flights.map((f) => (f.id === id ? { ...f, ...changes } : f));
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      const flight = updated.find((f) => f.id === id);
+      if (flight) {
+        await supabase.from('flights').upsert(flightToRow(flight, tripId));
+      }
+      mutate();
+    }
+  };
+
+  const deleteFlight = async (id: string) => {
+    const updated = flights.filter((f) => f.id !== id);
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('flights').delete().eq('id', id);
+      mutate();
+    }
+  };
+
+  return { flights, isLoading, error, updateFlights, addFlight, updateFlight, deleteFlight };
 }

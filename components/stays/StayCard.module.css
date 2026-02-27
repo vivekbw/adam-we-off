@@ -296,3 +296,9 @@
 .mapPlaceholder a:hover {
   text-decoration: underline;
 }
+
+.deleteRow {
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: flex-end;
+}

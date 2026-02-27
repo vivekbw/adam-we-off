@@ -28,6 +28,31 @@
   margin: 0;
 }
 
+.datesRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.editableDate {
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.editableDate:hover {
+  background: var(--color-bg-hover);
+}
+
+.dateSep {
+  color: var(--color-text-subtle);
+  font-size: 0.875rem;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 320px;

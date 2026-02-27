@@ -26,8 +26,7 @@ function toActivity(row: Record<string, unknown>): Activity {
 }
 
 async function fetchActivities(tripId: string): Promise<Activity[]> {
-  if (!isSupabaseConfigured) return SEED_ACTIVITIES;
-  if (!supabase) return SEED_ACTIVITIES;
+  if (!isSupabaseConfigured || !supabase) return SEED_ACTIVITIES;
   const { data, error } = await supabase
     .from('activities')
     .select('*')
@@ -107,5 +106,14 @@ export function useActivities(tripId: string) {
     }
   };
 
-  return { activities, isLoading, error, updateActivity, addActivity };
+  const deleteActivity = async (id: string) => {
+    const updated = activities.filter((a) => a.id !== id);
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('activities').delete().eq('id', id);
+      mutate();
+    }
+  };
+
+  return { activities, isLoading, error, updateActivity, addActivity, deleteActivity };
 }

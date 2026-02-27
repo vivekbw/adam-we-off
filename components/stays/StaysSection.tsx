@@ -4,38 +4,31 @@ import { useState, useMemo } from 'react';
 import type { Stay, ItinerarySegment } from '@/lib/constants';
 import { StayCoverage } from './StayCoverage';
 import { StayCard } from './StayCard';
+import { AddStayForm } from './AddStayForm';
+import { Button } from '@/components/ui/button';
 import styles from './StaysSection.module.css';
 
 export interface StaysSectionProps {
   stays: Stay[];
   onUpdateStay: (id: string, changes: Partial<Stay>) => void;
+  onAddStay?: (partial: Partial<Stay>) => void;
+  onDeleteStay?: (id: string) => void;
   itinerary: ItinerarySegment[];
 }
 
 export function StaysSection({
   stays,
   onUpdateStay,
+  onAddStay,
+  onDeleteStay,
   itinerary,
 }: StaysSectionProps) {
   const [selectedStayId, setSelectedStayId] = useState<string | null>(null);
   const [priceFilter, setPriceFilter] = useState(100);
   const [vibeFilter, setVibeFilter] = useState<string | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
 
   const bookedCount = stays.filter((s) => s.status === 'Booked').length;
-
-  const staysByCountry = useMemo(() => {
-    const grouped: Record<string, Stay[]> = {};
-    for (const stay of stays) {
-      if (!grouped[stay.country]) grouped[stay.country] = [];
-      grouped[stay.country].push(stay);
-    }
-    for (const key of Object.keys(grouped)) {
-      grouped[key].sort(
-        (a, b) => new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime()
-      );
-    }
-    return grouped;
-  }, [stays]);
 
   const VIBE_TYPE_MAP: Record<string, string[]> = {
     Social: ['Hostel'],
@@ -73,10 +66,15 @@ export function StaysSection({
   return (
     <section className={styles.section}>
       <header className={styles.header}>
-        <h2 className={styles.title}>Stays</h2>
-        <p className={styles.subtitle}>
-          {bookedCount} of {stays.length} booked
-        </p>
+        <div>
+          <h2 className={styles.title}>Stays</h2>
+          <p className={styles.subtitle}>
+            {bookedCount} of {stays.length} booked
+          </p>
+        </div>
+        {onAddStay && (
+          <Button onClick={() => setShowAdd(true)}>+ Add Stay</Button>
+        )}
       </header>
 
       <div className={styles.coverage}>
@@ -132,12 +130,24 @@ export function StaysSection({
                     setSelectedStayId((prev) => (prev === stay.id ? null : stay.id))
                   }
                   onUpdate={onUpdateStay}
+                  onDelete={onDeleteStay}
                 />
               ))}
             </div>
           </div>
         );
       })}
+
+      {onAddStay && (
+        <AddStayForm
+          open={showAdd}
+          onOpenChange={setShowAdd}
+          onAdd={(partial) => {
+            onAddStay(partial);
+            setShowAdd(false);
+          }}
+        />
+      )}
     </section>
   );
 }

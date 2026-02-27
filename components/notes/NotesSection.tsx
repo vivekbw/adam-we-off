@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Note } from '@/lib/constants';
 import { NoteCard } from './NoteCard';
 import { AddNoteForm } from './AddNoteForm';
+import { Button } from '@/components/ui/button';
 import styles from './NotesSection.module.css';
 
 export interface NotesSectionProps {
@@ -25,13 +26,13 @@ export function NotesSection({
     <section className={styles.section}>
       <div className={styles.header}>
         <h2 className={styles.title}>Notes</h2>
-        <button
-          type="button"
-          className={styles.addBtn}
+        <Button
+          variant={showAddForm ? 'outline' : 'default'}
+          size="sm"
           onClick={() => setShowAddForm((v) => !v)}
         >
-          {showAddForm ? '− Add Note' : '+ Add Note'}
-        </button>
+          {showAddForm ? '− Close' : '+ Add Note'}
+        </Button>
       </div>
       {showAddForm && (
         <div className={styles.formWrapper}>

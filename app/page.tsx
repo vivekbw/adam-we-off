@@ -1,15 +1,30 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { TopBar } from '@/components/layout/TopBar';
-import { useTrips, type TripRow } from '@/hooks/useTrips';
+import { useTrips, deleteTrip, type TripRow } from '@/hooks/useTrips';
 import { CITY_IMAGES, BUDDIES, daysBetween, fmtDate } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { NewTripModal } from '@/components/trip/NewTripModal';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import styles from './page.module.css';
 
-function TripCard({ trip, index }: { trip: TripRow; index: number }) {
+function TripCard({ trip, index, onDeleted }: { trip: TripRow; index: number; onDeleted: () => void }) {
   const cityKey = trip.cover_city ?? '';
   const coverSrc =
     CITY_IMAGES[cityKey] ??
@@ -18,6 +33,21 @@ function TripCard({ trip, index }: { trip: TripRow; index: number }) {
     trip.start_date && trip.end_date
       ? daysBetween(trip.start_date, trip.end_date)
       : null;
+
+  const [deleting, setDeleting] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  async function handleDelete() {
+    setDeleting(true);
+    const ok = await deleteTrip(trip.id);
+    if (ok) {
+      toast.success(`"${trip.name}" deleted`);
+      onDeleted();
+    } else {
+      toast.error('Failed to delete trip');
+    }
+    setDeleting(false);
+  }
 
   return (
     <motion.article
@@ -29,6 +59,8 @@ function TripCard({ trip, index }: { trip: TripRow; index: number }) {
         delay: index * 0.06,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <Link href={`/trip/${trip.id}`} className={styles.tripLink}>
         <div className={styles.cover}>
@@ -67,12 +99,45 @@ function TripCard({ trip, index }: { trip: TripRow; index: number }) {
           )}
         </div>
       </Link>
+      {hovered && (
+        <div
+          className={styles.deleteBtn}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        >
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="icon-xs"
+                onClick={(e) => e.stopPropagation()}
+              >
+                ✕
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure you want to delete this trip?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  &quot;{trip.name}&quot; and all its data (flights, stays, activities, notes) will be permanently removed. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? 'Deleting…' : 'Yes, delete trip'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
     </motion.article>
   );
 }
 
 export default function HomePage() {
-  const { trips, isLoading } = useTrips();
+  const { trips, isLoading, mutate } = useTrips();
+  const [showNewTrip, setShowNewTrip] = useState(false);
 
   return (
     <div className={styles.page}>
@@ -93,7 +158,7 @@ export default function HomePage() {
 
           {!isLoading &&
             trips.map((trip, i) => (
-              <TripCard key={trip.id} trip={trip} index={i} />
+              <TripCard key={trip.id} trip={trip} index={i} onDeleted={() => mutate()} />
             ))}
 
           {!isLoading && trips.length === 0 && (
@@ -112,13 +177,19 @@ export default function HomePage() {
               ease: [0.25, 0.46, 0.45, 0.94],
             }}
           >
-            <Link href="#" className={styles.newTripLink}>
+            <button
+              type="button"
+              className={styles.newTripLink}
+              onClick={() => setShowNewTrip(true)}
+            >
               <span className={styles.plus}>+</span>
               <span className={styles.newTripLabel}>Plan a new trip</span>
-            </Link>
+            </button>
           </motion.article>
         </div>
       </main>
+
+      <NewTripModal open={showNewTrip} onOpenChange={setShowNewTrip} />
     </div>
   );
 }

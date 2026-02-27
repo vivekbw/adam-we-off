@@ -9,6 +9,18 @@ import {
   fmtDate,
 } from '@/lib/constants';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import styles from './StayCard.module.css';
 
 const VIBES = ['Social', 'Relaxing', 'Adventurous', 'Romantic', 'Budget'];
@@ -46,9 +58,10 @@ export interface StayCardProps {
   isSelected: boolean;
   onSelect: () => void;
   onUpdate: (id: string, changes: Partial<Stay>) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function StayCard({ stay, isSelected, onSelect, onUpdate }: StayCardProps) {
+export function StayCard({ stay, isSelected, onSelect, onUpdate, onDelete }: StayCardProps) {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState(100);
   const [showMap, setShowMap] = useState(false);
@@ -198,6 +211,30 @@ export function StayCard({ stay, isSelected, onSelect, onUpdate }: StayCardProps
             <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
               Open in Google Maps
             </a>
+          </div>
+        )}
+
+        {onDelete && (
+          <div className={styles.deleteRow} onClick={(e) => e.stopPropagation()}>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="xs">Delete Stay</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete &quot;{stay.name}&quot;?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This stay in {stay.city} will be permanently removed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDelete(stay.id)}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>

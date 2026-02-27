@@ -129,14 +129,15 @@ alter table expenses enable row level security;
 alter table buddies enable row level security;
 
 -- For now, allow all access (tighten with auth later)
-create policy "Allow all" on trips for all using (true);
-create policy "Allow all" on itinerary_segments for all using (true);
-create policy "Allow all" on flights for all using (true);
-create policy "Allow all" on stays for all using (true);
-create policy "Allow all" on activities for all using (true);
-create policy "Allow all" on notes for all using (true);
-create policy "Allow all" on expenses for all using (true);
-create policy "Allow all" on buddies for all using (true);
+-- using (true) = read access, with check (true) = write access
+create policy "Allow all" on trips for all using (true) with check (true);
+create policy "Allow all" on itinerary_segments for all using (true) with check (true);
+create policy "Allow all" on flights for all using (true) with check (true);
+create policy "Allow all" on stays for all using (true) with check (true);
+create policy "Allow all" on activities for all using (true) with check (true);
+create policy "Allow all" on notes for all using (true) with check (true);
+create policy "Allow all" on expenses for all using (true) with check (true);
+create policy "Allow all" on buddies for all using (true) with check (true);
 
 -- Indexes
 create index if not exists idx_itinerary_trip on itinerary_segments(trip_id);

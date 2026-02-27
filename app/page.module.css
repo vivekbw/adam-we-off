@@ -22,9 +22,11 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-6);
+  align-items: start;
 }
 
 .tripCard {
+  position: relative;
   background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
   backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
@@ -40,10 +42,19 @@
   transform: translateY(-2px);
 }
 
+.deleteBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+}
+
 .tripLink {
   display: block;
   text-decoration: none;
   color: inherit;
+  position: relative;
+  z-index: 1;
 }
 
 .cover {
@@ -111,44 +122,69 @@
 }
 
 .newTripCard {
-  background-color: transparent;
   border: 2px dashed var(--color-border);
   border-radius: var(--radius-lg);
-  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: border-color var(--transition-base), background-color var(--transition-base);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.02), rgba(37, 99, 235, 0.06));
 }
 
 .newTripCard:hover {
-  border-color: var(--color-primary);
-  background-color: var(--color-primary-muted);
+  border-color: var(--color-primary-hex);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.04), rgba(37, 99, 235, 0.10));
 }
 
 .newTripLink {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
+  gap: var(--space-3);
   text-decoration: none;
   color: var(--color-text-muted);
   padding: var(--space-6);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  width: 100%;
+}
+
+.newTripLink:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 
 .newTripCard:hover .newTripLink {
-  color: var(--color-primary);
+  color: var(--color-primary-hex);
 }
 
 .plus {
-  font-size: 2rem;
-  font-weight: 300;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 400;
   line-height: 1;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-primary-hex);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.newTripCard:hover .plus {
+  background: rgba(37, 99, 235, 0.15);
+  transform: scale(1.05);
 }
 
 .newTripLabel {
   font-size: 0.9375rem;
   font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .empty {

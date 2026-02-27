@@ -3,6 +3,10 @@
  * Adapted from GrokSDR "Arctic Frost" light theme
  * Fonts: Instrument Serif (display) + Figtree (body)
  * Glass-first surfaces with clean light aesthetic
+ *
+ * NOTE: --color-primary, --color-accent, --color-border, and --radius-*
+ * are managed by the shadcn @theme inline block in globals.css.
+ * Only app-specific tokens live here.
  */
 
 :root {
@@ -23,11 +27,10 @@
   --color-text-muted: #475569;
   --color-text-subtle: #94A3B8;
 
-  /* ── Accent (Blue-600 primary) ── */
-  --color-primary: #2563EB;
+  /* ── App-specific accent aliases ── */
+  --color-primary-hex: #2563EB;
   --color-primary-hover: #1D4ED8;
   --color-primary-muted: rgba(37, 99, 235, 0.08);
-  --color-accent: #2563EB;
   --color-accent-dim: #1D4ED8;
   --color-accent-glow: rgba(37, 99, 235, 0.08);
 
@@ -46,8 +49,7 @@
   --status-need-to-book: #F43F5E;
   --status-new: #6366F1;
 
-  /* ── Borders ── */
-  --color-border: #E2E8F0;
+  /* ── Borders (app-specific) ── */
   --color-border-secondary: #CBD5E1;
 
   /* Legacy aliases (used by existing modules) */
@@ -68,12 +70,7 @@
   --space-20: 80px;
   --space-24: 96px;
 
-  /* ── Border radius ── */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  /* ── Border radius (app-specific extras) ── */
   --radius-full: 9999px;
 
   /* ── Shadows (light theme) ── */

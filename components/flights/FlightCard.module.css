@@ -130,3 +130,9 @@
   font-size: 0.71875rem;
   color: var(--color-tag-yellow);
 }
+
+.actions {
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: flex-end;
+}

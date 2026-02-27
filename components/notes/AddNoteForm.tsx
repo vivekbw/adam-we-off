@@ -3,6 +3,16 @@
 import { useState } from 'react';
 import type { Note } from '@/lib/constants';
 import { BUDDIES } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import styles from './AddNoteForm.module.css';
 
 const NOTE_TYPES: { type: string; icon: string }[] = [
@@ -39,7 +49,7 @@ export function AddNoteForm({ onAdd, onCancel }: AddNoteFormProps) {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div>
-        <label className={styles.typeLabel}>Note type</label>
+        <Label className="mb-2 block">Note type</Label>
         <div className={styles.typePills}>
           {NOTE_TYPES.map(({ type: t, icon: i }) => (
             <button
@@ -54,42 +64,36 @@ export function AddNoteForm({ onAdd, onCancel }: AddNoteFormProps) {
           ))}
         </div>
       </div>
-      <div className={styles.authorRow}>
-        <label htmlFor="add-note-author" className={styles.authorLabel}>
-          Author
-        </label>
-        <select
-          id="add-note-author"
-          className={styles.authorSelect}
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        >
-          {AUTHORS.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
-          ))}
-        </select>
+      <div className="grid gap-2">
+        <Label htmlFor="add-note-author">Author</Label>
+        <Select value={author} onValueChange={setAuthor}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select author" />
+          </SelectTrigger>
+          <SelectContent>
+            {AUTHORS.map((a) => (
+              <SelectItem key={a} value={a}>{a}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <div className={styles.contentRow}>
-        <label htmlFor="add-note-content" className={styles.contentLabel}>
-          Content
-        </label>
-        <textarea
+      <div className="grid gap-2">
+        <Label htmlFor="add-note-content">Content</Label>
+        <Textarea
           id="add-note-content"
-          className={styles.contentTextarea}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Add your note..."
+          rows={3}
         />
       </div>
       <div className={styles.actions}>
-        <button type="button" className={styles.cancelBtn} onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
-        </button>
-        <button type="submit" className={styles.addBtn} disabled={!content.trim()}>
+        </Button>
+        <Button type="submit" disabled={!content.trim()}>
           Add Note
-        </button>
+        </Button>
       </div>
     </form>
   );

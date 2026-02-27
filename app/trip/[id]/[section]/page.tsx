@@ -42,9 +42,9 @@ export default function SectionPage() {
   const tripName = trip?.name ?? 'Loading…';
 
   const { itinerary } = useItinerary(id);
-  const { flights } = useFlights(id);
-  const { stays, updateStay } = useStays(id);
-  const { activities, updateActivity, addActivity } = useActivities(id);
+  const { flights, addFlight, deleteFlight } = useFlights(id);
+  const { stays, updateStay, addStay, deleteStay } = useStays(id);
+  const { activities, updateActivity, addActivity, deleteActivity } = useActivities(id);
   const { notes, addNote, editNote, deleteNote } = useNotes(id);
 
   if (!isValidSection(section)) {
@@ -70,12 +70,20 @@ export default function SectionPage() {
   const renderSection = () => {
     switch (section) {
       case 'flights':
-        return <FlightsSection flights={flights} />;
+        return (
+          <FlightsSection
+            flights={flights}
+            onAddFlight={addFlight}
+            onDeleteFlight={deleteFlight}
+          />
+        );
       case 'stays':
         return (
           <StaysSection
             stays={stays}
             onUpdateStay={updateStay}
+            onAddStay={addStay}
+            onDeleteStay={deleteStay}
             itinerary={itinerary}
           />
         );
@@ -85,6 +93,7 @@ export default function SectionPage() {
             activities={activities}
             onUpdateActivity={updateActivity}
             onAddActivity={addActivity}
+            onDeleteActivity={deleteActivity}
             itinerary={itinerary}
           />
         );

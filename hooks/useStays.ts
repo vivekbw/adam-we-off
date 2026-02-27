@@ -28,9 +28,28 @@ function toStay(row: Record<string, unknown>): Stay {
   };
 }
 
+function stayToRow(s: Stay, tripId: string) {
+  return {
+    id: s.id,
+    trip_id: tripId,
+    city: s.city,
+    country: s.country,
+    flag: s.flag,
+    check_in: s.checkIn,
+    check_out: s.checkOut,
+    name: s.name,
+    type: s.type,
+    status: s.status,
+    booked_by: s.bookedBy,
+    cost_per_night: s.costPerNight,
+    nights: s.nights,
+    link: s.link,
+    confirmation_link: s.confirmationLink,
+  };
+}
+
 async function fetchStays(tripId: string): Promise<Stay[]> {
-  if (!isSupabaseConfigured) return SEED_STAYS;
-  if (!supabase) return SEED_STAYS;
+  if (!isSupabaseConfigured || !supabase) return SEED_STAYS;
   const { data, error } = await supabase
     .from('stays')
     .select('*')
@@ -55,27 +74,46 @@ export function useStays(tripId: string) {
     if (isSupabaseConfigured && supabase) {
       const stay = updated.find((s) => s.id === id);
       if (stay) {
-        await supabase.from('stays').upsert({
-          id: stay.id,
-          trip_id: tripId,
-          city: stay.city,
-          country: stay.country,
-          flag: stay.flag,
-          check_in: stay.checkIn,
-          check_out: stay.checkOut,
-          name: stay.name,
-          type: stay.type,
-          status: stay.status,
-          booked_by: stay.bookedBy,
-          cost_per_night: stay.costPerNight,
-          nights: stay.nights,
-          link: stay.link,
-          confirmation_link: stay.confirmationLink,
-        });
+        await supabase.from('stays').upsert(stayToRow(stay, tripId));
       }
       mutate();
     }
   };
 
-  return { stays, isLoading, error, updateStay };
+  const addStay = async (partial: Partial<Stay>) => {
+    const id = `st-${Date.now()}`;
+    const newStay: Stay = {
+      id,
+      city: partial.city ?? '',
+      country: partial.country ?? '',
+      flag: partial.flag ?? '',
+      checkIn: partial.checkIn ?? '',
+      checkOut: partial.checkOut ?? '',
+      name: partial.name ?? '',
+      type: partial.type ?? 'Hotel',
+      status: partial.status ?? 'Need to Book',
+      bookedBy: partial.bookedBy ?? null,
+      costPerNight: partial.costPerNight ?? 0,
+      nights: partial.nights ?? 1,
+      link: partial.link ?? null,
+      confirmationLink: partial.confirmationLink ?? null,
+    };
+    const updated = [...stays, newStay];
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('stays').insert(stayToRow(newStay, tripId));
+      mutate();
+    }
+  };
+
+  const deleteStay = async (id: string) => {
+    const updated = stays.filter((s) => s.id !== id);
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('stays').delete().eq('id', id);
+      mutate();
+    }
+  };
+
+  return { stays, isLoading, error, updateStay, addStay, deleteStay };
 }

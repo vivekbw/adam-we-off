@@ -2,6 +2,18 @@
 
 import type { Flight } from '@/lib/constants';
 import { fmtDate } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import styles from './FlightCard.module.css';
 
 const FLIGHT_WARNINGS: Record<string, string> = {
@@ -14,9 +26,10 @@ export interface FlightCardProps {
   flight: Flight;
   isSelected: boolean;
   onClick: () => void;
+  onDelete?: (id: string) => void;
 }
 
-export function FlightCard({ flight, isSelected, onClick }: FlightCardProps) {
+export function FlightCard({ flight, isSelected, onClick, onDelete }: FlightCardProps) {
   const warning = FLIGHT_WARNINGS[flight.id];
   const statusClass =
     flight.status === 'Booked' ? styles.tagGreen : styles.tagYellow;
@@ -79,6 +92,29 @@ export function FlightCard({ flight, isSelected, onClick }: FlightCardProps) {
       )}
       {warning && (
         <div className={styles.warningRow}>⚠️ {warning}</div>
+      )}
+      {onDelete && (
+        <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="xs">Delete</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete flight?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {flight.from} → {flight.to} on {fmtDate(flight.date)} will be permanently removed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(flight.id)}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       )}
     </div>
   );

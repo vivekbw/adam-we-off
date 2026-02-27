@@ -5,14 +5,19 @@ import type { Flight } from '@/lib/constants';
 import { FlightCard } from './FlightCard';
 import { FlightDetail } from './FlightDetail';
 import { FlightGlobe } from './FlightGlobe';
+import { AddFlightForm } from './AddFlightForm';
+import { Button } from '@/components/ui/button';
 import styles from './FlightsSection.module.css';
 
 export interface FlightsSectionProps {
   flights: Flight[];
+  onAddFlight?: (partial: Partial<Flight>) => void;
+  onDeleteFlight?: (id: string) => void;
 }
 
-export function FlightsSection({ flights }: FlightsSectionProps) {
+export function FlightsSection({ flights, onAddFlight, onDeleteFlight }: FlightsSectionProps) {
   const [selected, setSelected] = useState<Flight | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
 
   const handleCardClick = (flight: Flight) => {
     setSelected((prev) => (prev?.id === flight.id ? null : flight));
@@ -21,10 +26,15 @@ export function FlightsSection({ flights }: FlightsSectionProps) {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h2 className={styles.heading}>✈️ Flights</h2>
-        <p className={styles.subheading}>
-          All {flights.length} flight segments for your trip.
-        </p>
+        <div>
+          <h2 className={styles.heading}>✈️ Flights</h2>
+          <p className={styles.subheading}>
+            All {flights.length} flight segments for your trip.
+          </p>
+        </div>
+        {onAddFlight && (
+          <Button onClick={() => setShowAdd(true)}>+ Add Flight</Button>
+        )}
       </header>
 
       <div className={styles.grid}>
@@ -35,6 +45,7 @@ export function FlightsSection({ flights }: FlightsSectionProps) {
               flight={flight}
               isSelected={selected?.id === flight.id}
               onClick={() => handleCardClick(flight)}
+              onDelete={onDeleteFlight}
             />
           ))}
         </div>
@@ -55,6 +66,17 @@ export function FlightsSection({ flights }: FlightsSectionProps) {
           </div>
         </aside>
       </div>
+
+      {onAddFlight && (
+        <AddFlightForm
+          open={showAdd}
+          onOpenChange={setShowAdd}
+          onAdd={(partial) => {
+            onAddFlight(partial);
+            setShowAdd(false);
+          }}
+        />
+      )}
     </div>
   );
 }

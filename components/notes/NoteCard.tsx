@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import type { Note } from '@/lib/constants';
 import { NOTE_COLORS } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import styles from './NoteCard.module.css';
 
 const NOTE_ICONS: Record<string, string> = {
@@ -57,41 +59,29 @@ export function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
         </div>
         <div className={styles.headerActions}>
           {!isEditing && (
-            <>
-              <button
-                type="button"
-                className={`${styles.actionBtn} ${styles.editBtn}`}
-                onClick={() => setIsEditing(true)}
-              >
+            <div className="flex gap-1">
+              <Button variant="ghost" size="xs" onClick={() => setIsEditing(true)}>
                 Edit
-              </button>
-              <button
-                type="button"
-                className={`${styles.actionBtn} ${styles.deleteBtn}`}
-                onClick={() => onDelete(note.id)}
-              >
+              </Button>
+              <Button variant="destructive" size="xs" onClick={() => onDelete(note.id)}>
                 Delete
-              </button>
-            </>
+              </Button>
+            </div>
           )}
         </div>
       </div>
       <div className={styles.body}>
         {isEditing ? (
           <>
-            <textarea
-              className={styles.textarea}
+            <Textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               autoFocus
+              rows={3}
             />
-            <div className={styles.editActions}>
-              <button type="button" className={styles.saveBtn} onClick={handleSave}>
-                Save
-              </button>
-              <button type="button" className={styles.cancelBtn} onClick={handleCancel}>
-                Cancel
-              </button>
+            <div className="flex gap-2 mt-2">
+              <Button size="xs" onClick={handleSave}>Save</Button>
+              <Button variant="outline" size="xs" onClick={handleCancel}>Cancel</Button>
             </div>
           </>
         ) : (

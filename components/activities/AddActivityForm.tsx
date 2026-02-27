@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import type { Activity } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import styles from './AddActivityForm.module.css';
 
 const POPULAR_RECS = [
@@ -47,17 +49,16 @@ export function AddActivityForm({ city, onAdd }: AddActivityFormProps) {
   return (
     <div className={styles.card}>
       <div className={styles.inputRow}>
-        <input
+        <Input
           type="text"
-          className={styles.input}
           placeholder="Activity name or link"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         />
-        <button type="button" className={styles.searchBtn} onClick={handleSearch}>
+        <Button size="sm" onClick={handleSearch}>
           Search Activities
-        </button>
+        </Button>
       </div>
       <div className={styles.popularTitle}>Popular in {city}</div>
       <div className={styles.popularList}>
@@ -81,13 +82,12 @@ export function AddActivityForm({ city, onAdd }: AddActivityFormProps) {
                 >
                   Airbnb
                 </a>
-                <button
-                  type="button"
-                  className={`${styles.searchBtn} ${styles.addBtn}`}
+                <Button
+                  size="xs"
                   onClick={() => handleAddPopular(rec)}
                 >
                   Add
-                </button>
+                </Button>
               </div>
             </div>
           </div>

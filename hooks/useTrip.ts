@@ -19,9 +19,22 @@ function toSegment(row: Record<string, unknown>): ItinerarySegment {
   };
 }
 
+function segmentToRow(seg: ItinerarySegment, tripId: string) {
+  return {
+    id: seg.id,
+    trip_id: tripId,
+    country: seg.country,
+    city: seg.city,
+    start_date: seg.startDate,
+    end_date: seg.endDate,
+    flag: seg.flag,
+    nights: seg.nights,
+    country_code: seg.countryCode,
+  };
+}
+
 async function fetchItinerary(tripId: string): Promise<ItinerarySegment[]> {
-  if (!isSupabaseConfigured) return SEED_ITINERARY;
-  if (!supabase) return SEED_ITINERARY;
+  if (!isSupabaseConfigured || !supabase) return SEED_ITINERARY;
   const { data, error } = await supabase
     .from('itinerary_segments')
     .select('*')
@@ -38,25 +51,53 @@ export function useItinerary(tripId: string) {
     { fallbackData: SEED_ITINERARY }
   );
 
+  const itinerary = data ?? SEED_ITINERARY;
+
   const updateItinerary = async (segments: ItinerarySegment[]) => {
     mutate(segments, false);
     if (isSupabaseConfigured && supabase) {
       for (const seg of segments) {
-        await supabase.from('itinerary_segments').upsert({
-          id: seg.id,
-          trip_id: tripId,
-          country: seg.country,
-          city: seg.city,
-          start_date: seg.startDate,
-          end_date: seg.endDate,
-          flag: seg.flag,
-          nights: seg.nights,
-          country_code: seg.countryCode,
-        });
+        await supabase.from('itinerary_segments').upsert(segmentToRow(seg, tripId));
       }
       mutate();
     }
   };
 
-  return { itinerary: data ?? SEED_ITINERARY, isLoading, error, updateItinerary };
+  const addSegment = async (partial: Partial<ItinerarySegment>) => {
+    const id = `seg-${Date.now()}`;
+    const lastSeg = itinerary[itinerary.length - 1];
+    const startDate = lastSeg ? lastSeg.endDate : new Date().toISOString().split('T')[0];
+    const nights = partial.nights ?? 2;
+    const dt = new Date(startDate + 'T00:00:00');
+    dt.setDate(dt.getDate() + nights);
+    const endDate = dt.toISOString().split('T')[0];
+
+    const newSeg: ItinerarySegment = {
+      id,
+      country: partial.country ?? '',
+      city: partial.city ?? '',
+      startDate,
+      endDate,
+      flag: partial.flag ?? '',
+      nights,
+      countryCode: partial.countryCode ?? '',
+    };
+    const updated = [...itinerary, newSeg];
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('itinerary_segments').insert(segmentToRow(newSeg, tripId));
+      mutate();
+    }
+  };
+
+  const removeSegment = async (segId: string) => {
+    const updated = itinerary.filter((s) => s.id !== segId);
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('itinerary_segments').delete().eq('id', segId);
+      mutate();
+    }
+  };
+
+  return { itinerary, isLoading, error, updateItinerary, addSegment, removeSegment };
 }

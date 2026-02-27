@@ -21,6 +21,7 @@ export interface ActivitiesSectionProps {
   activities: Activity[];
   onUpdateActivity: (id: string, changes: Partial<Activity>) => void;
   onAddActivity?: (activity: Partial<Activity>) => void;
+  onDeleteActivity?: (id: string) => void;
   itinerary: ItinerarySegment[];
 }
 
@@ -28,6 +29,7 @@ export function ActivitiesSection({
   activities,
   onUpdateActivity,
   onAddActivity,
+  onDeleteActivity,
   itinerary,
 }: ActivitiesSectionProps) {
   const [vibeFilter, setVibeFilter] = useState<string>('All');
@@ -118,6 +120,7 @@ export function ActivitiesSection({
                   key={activity.id}
                   activity={activity}
                   onUpdate={onUpdateActivity}
+                  onDelete={onDeleteActivity}
                 />
               ))}
               {onAddActivity && (
