@@ -77,6 +77,13 @@
   flex-shrink: 0;
 }
 
+.emptyHint {
+  font-size: 0.8125rem;
+  color: var(--color-text-subtle);
+  text-align: center;
+  padding: var(--space-3) 0;
+}
+
 .summary {
   margin-top: var(--space-4);
   padding-top: var(--space-4);

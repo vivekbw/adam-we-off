@@ -1,6 +1,7 @@
 'use client';
 
 import type { Expense } from '@/lib/constants';
+import type { BuddyRow } from '@/hooks/useBuddies';
 import { Modal } from '@/components/layout/Modal';
 import { ExpenseList } from './ExpenseList';
 import { BalanceCard } from './BalanceCard';
@@ -11,6 +12,7 @@ export interface SplitModalProps {
   onUpdateExpenses: (expenses: Expense[]) => void;
   isOpen: boolean;
   onClose: () => void;
+  buddies?: BuddyRow[];
 }
 
 export function SplitModal({
@@ -18,7 +20,10 @@ export function SplitModal({
   onUpdateExpenses,
   isOpen,
   onClose,
+  buddies = [],
 }: SplitModalProps) {
+  const buddyNames = buddies.map((b) => b.name);
+
   const handleEdit = (id: string, data: Expense) => {
     onUpdateExpenses(
       expenses.map((e) => (e.id === id ? data : e))
@@ -40,13 +45,14 @@ export function SplitModal({
         <div className={styles.left}>
           <ExpenseList
             expenses={expenses}
+            buddyNames={buddyNames}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onAdd={handleAdd}
           />
         </div>
         <div className={styles.right}>
-          <BalanceCard expenses={expenses} />
+          <BalanceCard expenses={expenses} buddies={buddies} />
         </div>
       </div>
     </Modal>

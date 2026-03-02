@@ -12,6 +12,7 @@ export interface NotesSectionProps {
   onAddNote: (note: Omit<Note, 'id'>) => void;
   onEditNote: (id: string, content: string) => void;
   onDeleteNote: (id: string) => void;
+  buddyNames?: string[];
 }
 
 export function NotesSection({
@@ -19,6 +20,7 @@ export function NotesSection({
   onAddNote,
   onEditNote,
   onDeleteNote,
+  buddyNames = [],
 }: NotesSectionProps) {
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -42,6 +44,7 @@ export function NotesSection({
               setShowAddForm(false);
             }}
             onCancel={() => setShowAddForm(false)}
+            buddyNames={buddyNames}
           />
         </div>
       )}

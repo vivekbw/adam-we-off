@@ -14,6 +14,7 @@ export interface StaysSectionProps {
   onAddStay?: (partial: Partial<Stay>) => void;
   onDeleteStay?: (id: string) => void;
   itinerary: ItinerarySegment[];
+  buddyNames?: string[];
 }
 
 export function StaysSection({
@@ -22,6 +23,7 @@ export function StaysSection({
   onAddStay,
   onDeleteStay,
   itinerary,
+  buddyNames = [],
 }: StaysSectionProps) {
   const [selectedStayId, setSelectedStayId] = useState<string | null>(null);
   const [priceFilter, setPriceFilter] = useState(100);
@@ -131,6 +133,7 @@ export function StaysSection({
                   }
                   onUpdate={onUpdateStay}
                   onDelete={onDeleteStay}
+                  buddyNames={buddyNames}
                 />
               ))}
             </div>

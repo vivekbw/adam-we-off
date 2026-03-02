@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import type { Expense } from '@/lib/constants';
-import { BUDDIES, fmtDate } from '@/lib/constants';
+import { fmtDate } from '@/lib/constants';
 import styles from './ExpenseList.module.css';
 
-const BUDDY_NAMES = BUDDIES.map((b) => b.name);
 const CATEGORIES = ['Stay', 'Flight', 'Activity', 'Food', 'Transport', 'Other'];
 
 export interface ExpenseListProps {
   expenses: Expense[];
+  buddyNames?: string[];
   onEdit: (id: string, data: Expense) => void;
   onDelete: (id: string) => void;
   onAdd: (expense: Omit<Expense, 'id'>) => void;
@@ -20,7 +20,8 @@ function perPersonSplit(amount: number, splitCount: number): number {
   return Math.round((amount / splitCount) * 100) / 100;
 }
 
-export function ExpenseList({ expenses, onEdit, onDelete, onAdd }: ExpenseListProps) {
+export function ExpenseList({ expenses, buddyNames = [], onEdit, onDelete, onAdd }: ExpenseListProps) {
+  const BUDDY_NAMES = buddyNames;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 

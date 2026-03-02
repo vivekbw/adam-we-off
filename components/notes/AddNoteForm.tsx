@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import type { Note } from '@/lib/constants';
-import { BUDDIES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -24,14 +23,14 @@ const NOTE_TYPES: { type: string; icon: string }[] = [
   { type: 'Other', icon: '💬' },
 ];
 
-const AUTHORS = [...BUDDIES.map((b) => b.name), 'All'];
-
 export interface AddNoteFormProps {
   onAdd: (note: Omit<Note, 'id'>) => void;
   onCancel: () => void;
+  buddyNames?: string[];
 }
 
-export function AddNoteForm({ onAdd, onCancel }: AddNoteFormProps) {
+export function AddNoteForm({ onAdd, onCancel, buddyNames = [] }: AddNoteFormProps) {
+  const AUTHORS = [...buddyNames, 'All'];
   const [type, setType] = useState('Other');
   const [author, setAuthor] = useState('You');
   const [content, setContent] = useState('');

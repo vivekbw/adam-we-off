@@ -1,0 +1,225 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ── Left: hero image ── */
+
+.imagePanel {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background: #1a2744;
+}
+
+.heroImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.04) 40%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+}
+
+.imageContent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 3rem;
+  z-index: 1;
+}
+
+.quote {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  max-width: 420px;
+}
+
+.attribution {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+
+/* ── Right: sign-in form ── */
+
+.formPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: var(--color-bg);
+}
+
+.formInner {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brandIcon {
+  font-size: 1.5rem;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+}
+
+.subline {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 340px;
+}
+
+/* ── Google button: white card style ── */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.googleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 52px;
+  padding: 0 1.25rem;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.googleBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.googleBtn:active {
+  transform: scale(0.99);
+}
+
+.googleBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.googleBtn svg {
+  flex-shrink: 0;
+}
+
+.terms {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+  text-align: center;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.featureIcon {
+  font-size: 1rem;
+  width: 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-rows: 300px 1fr;
+  }
+
+  .imagePanel {
+    min-height: 300px;
+  }
+
+  .imageContent {
+    padding: 1.5rem;
+  }
+
+  .quote {
+    font-size: 1.125rem;
+  }
+
+  .formPanel {
+    padding: 2rem 1.5rem;
+  }
+
+  .headline {
+    font-size: 2rem;
+  }
+}

@@ -110,15 +110,24 @@
   margin-left: 0;
 }
 
-.cities {
+.route {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  align-items: center;
+  gap: 2px 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
 }
 
-.cityTag {
-  font-size: 0.75rem;
+.routeItem {
+  white-space: nowrap;
+}
+
+.routeArrow {
+  margin: 0 5px;
   color: var(--color-text-subtle);
+  font-size: 0.625rem;
 }
 
 .newTripCard {

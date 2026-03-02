@@ -2,7 +2,12 @@
   padding: var(--space-6) 0;
 }
 
-.header {
+/* ── Top header ── */
+
+.topHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: var(--space-6);
 }
 
@@ -11,74 +16,223 @@
   font-weight: 400;
   font-size: 1.5rem;
   color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
-  margin-top: var(--space-1);
+  margin-top: 2px;
 }
 
-.vibeBar {
+/* ── City pill navigation ── */
+
+.cityNav {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-8);
+  gap: 6px;
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.vibeBtn {
-  padding: var(--space-2) var(--space-4);
+.cityNav::-webkit-scrollbar {
+  display: none;
+}
+
+.cityPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-body);
   font-size: 0.8125rem;
   font-weight: 500;
+  color: var(--color-text-muted);
   background: var(--color-bg-elevated);
-  color: var(--color-text);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   cursor: pointer;
+  white-space: nowrap;
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-subtle);
 }
 
-.vibeBtn:hover {
-  background: var(--color-primary-muted);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+.cityPill:hover {
+  border-color: var(--color-primary-hex);
+  color: var(--color-text);
+  background: var(--color-bg-hover);
 }
 
-.vibeBtnActive {
-  background: var(--color-primary-muted);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+.cityPillActive {
+  background: var(--color-primary-hex);
+  border-color: var(--color-primary-hex);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
 
-.cityGroup {
-  margin-bottom: var(--space-8);
+.cityPillActive:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: #fff;
+}
+
+.pillFlag {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.pillCity {
+  line-height: 1;
+}
+
+.pillCount {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+/* ── City panel (animated per city) ── */
+
+.cityPanel {
+  min-height: 200px;
 }
 
 .cityHeader {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.125rem;
-  color: var(--color-text);
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+
+.cityInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .cityFlag {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.cityName {
+  font-family: var(--font-display);
+  font-weight: 400;
   font-size: 1.25rem;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
 }
 
 .cityDates {
+  display: block;
   font-size: 0.8125rem;
-  font-weight: 400;
   color: var(--color-text-muted);
-  margin-left: var(--space-2);
+  margin-top: 1px;
 }
+
+.navArrows {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.arrowBtn {
+  width: 32px;
+  height: 32px;
+}
+
+.pageIndicator {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-subtle);
+  min-width: 36px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Progress bar ── */
+
+.progressRow {
+  margin-bottom: var(--space-5);
+}
+
+.progressBar {
+  height: 4px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-tag-green);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.progressLabels {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.progressStat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* ── Activity grid ── */
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-4);
+}
+
+/* ── Empty states ── */
+
+.emptyState,
+.cityEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-12) var(--space-6);
+  color: var(--color-text-subtle);
+  text-align: center;
+}
+
+.cityEmpty {
+  padding: var(--space-8) var(--space-6);
+}
+
+.cityEmpty p,
+.emptyState p {
+  font-size: 0.875rem;
+  max-width: 280px;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 640px) {
+  .cityHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .navArrows {
+    align-self: flex-end;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }

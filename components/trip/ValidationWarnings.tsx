@@ -37,18 +37,23 @@ const DEFAULT_WARNINGS: ValidationWarning[] = [
 ];
 
 export interface ValidationWarningsProps {
-  warnings?: Array<{ type: string; msg: string; icon: string }>;
+  warnings?: ValidationWarning[];
 }
 
 export function ValidationWarnings({
   warnings = DEFAULT_WARNINGS,
 }: ValidationWarningsProps) {
+  if (warnings.length === 0) return null;
+
   return (
     <div className={styles.wrapper}>
-      <div className={styles.title}>🔍 Trip Validation</div>
-      <div className={styles.grid}>
+      <div className={styles.header}>
+        <span className={styles.title}>Heads Up</span>
+        <span className={styles.count}>{warnings.length}</span>
+      </div>
+      <div className={styles.list}>
         {warnings.map((w, i) => (
-          <div key={i} className={styles.card}>
+          <div key={i} className={`${styles.item} ${styles[w.type] ?? ''}`}>
             <span className={styles.icon}>{w.icon}</span>
             <span className={styles.msg}>{w.msg}</span>
           </div>

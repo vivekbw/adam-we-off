@@ -2,7 +2,6 @@
 
 import type { Activity } from '@/lib/constants';
 import {
-  BUDDIES,
   ACTIVITY_IMAGES,
   fmtDate,
 } from '@/lib/constants';
@@ -27,15 +26,16 @@ export interface ActivityCardProps {
   activity: Activity;
   onUpdate: (id: string, changes: Partial<Activity>) => void;
   onDelete?: (id: string) => void;
+  buddyNames?: string[];
 }
 
-export function ActivityCard({ activity, onUpdate, onDelete }: ActivityCardProps) {
+export function ActivityCard({ activity, onUpdate, onDelete, buddyNames = [] }: ActivityCardProps) {
   const imageUrl =
     activity.status === 'Booked' ? ACTIVITY_IMAGES[activity.name] : null;
   const isBooked = activity.status === 'Booked';
 
   const bookedByOptions = [
-    ...BUDDIES.map((b) => ({ label: b.name, value: b.name })),
+    ...buddyNames.map((n) => ({ label: n, value: n })),
     { label: 'None', value: '' },
   ];
 
