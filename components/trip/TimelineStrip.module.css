@@ -1,20 +1,18 @@
 .strip {
   display: flex;
   align-items: stretch;
-  gap: 0;
-  overflow-x: auto;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-medium);
   border: 1px solid var(--color-border);
-  scrollbar-gutter: stable;
 }
 
 .card {
-  flex-shrink: 0;
   position: relative;
   overflow: hidden;
-  min-width: 120px;
+  min-width: 90px;
+  cursor: pointer;
+  background: #1a1a1a;
 }
 
 .cardImage {
@@ -23,12 +21,23 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.card:hover .cardImage {
+  transform: scale(1.03);
+  filter: brightness(1.08);
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.1) 55%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.08) 55%);
+  transition: background 0.4s ease;
+}
+
+.card:hover .overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.02) 60%);
 }
 
 .content {
@@ -59,24 +68,4 @@
 .nights {
   color: rgba(255, 255, 255, 0.75);
   font-size: 0.6875rem;
-}
-
-.chevron {
-  position: absolute;
-  right: -14px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  width: 28px;
-  height: 28px;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-subtle);
-  font-size: 0.875rem;
-  color: var(--color-text);
-  flex-shrink: 0;
 }

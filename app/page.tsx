@@ -7,7 +7,9 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { TopBar } from '@/components/layout/TopBar';
 import { useTrips, deleteTrip, type TripRow } from '@/hooks/useTrips';
-import { CITY_IMAGES, BUDDIES, daysBetween, fmtDate } from '@/lib/constants';
+import { useTripCities } from '@/hooks/useTrip';
+import { CITY_IMAGES, daysBetween, fmtDate } from '@/lib/constants';
+import { useBuddies } from '@/hooks/useBuddies';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { NewTripModal } from '@/components/trip/NewTripModal';
 import { Button } from '@/components/ui/button';
@@ -33,6 +35,8 @@ function TripCard({ trip, index, onDeleted }: { trip: TripRow; index: number; on
     trip.start_date && trip.end_date
       ? daysBetween(trip.start_date, trip.end_date)
       : null;
+  const cities = useTripCities(trip.id);
+  const { buddies } = useBuddies(trip.id);
 
   const [deleting, setDeleting] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -80,21 +84,33 @@ function TripCard({ trip, index, onDeleted }: { trip: TripRow; index: number; on
               : 'Dates TBD'}
             {dayCount ? ` · ${dayCount} days` : ''}
           </p>
-          <div className={styles.buddies}>
-            {BUDDIES.map((b) => (
-              <div
-                key={b.id}
-                className={styles.avatar}
-                style={{ backgroundColor: b.color }}
-                title={b.name}
-              >
-                {b.avatar}
-              </div>
-            ))}
-          </div>
-          {trip.cover_city && (
-            <div className={styles.cities}>
-              <span className={styles.cityTag}>{trip.cover_city}</span>
+          {buddies.length > 0 && (
+            <div className={styles.buddies}>
+              {buddies.map((b) => (
+                <div
+                  key={b.id}
+                  className={styles.avatar}
+                  style={{ backgroundColor: b.color }}
+                  title={b.name}
+                >
+                  {b.avatar ?? b.name[0]}
+                </div>
+              ))}
+            </div>
+          )}
+          {cities.length > 0 && (
+            <div className={styles.route}>
+              {cities.map((city, i) => (
+                <span key={i} className={styles.routeItem}>
+                  {i > 0 && <span className={styles.routeArrow}>→</span>}
+                  {city}
+                </span>
+              ))}
+            </div>
+          )}
+          {cities.length === 0 && trip.cover_city && (
+            <div className={styles.route}>
+              <span className={styles.routeItem}>{trip.cover_city}</span>
             </div>
           )}
         </div>

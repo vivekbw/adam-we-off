@@ -1,8 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Modal } from '@/components/layout/Modal';
-import { BUDDIES } from '@/lib/constants';
+import { UserPlus, Trash2, Copy, Check, Link2, Mail } from 'lucide-react';
+import { toast } from 'sonner';
+import { useBuddies, type BuddyRow } from '@/hooks/useBuddies';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import styles from './BuddiesModal.module.css';
 
 export interface BuddiesModalProps {
@@ -12,71 +33,172 @@ export interface BuddiesModalProps {
 }
 
 export function BuddiesModal({ isOpen, onClose, tripId }: BuddiesModalProps) {
+  const { buddies, addBuddy, removeBuddy } = useBuddies(tripId ?? '');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [copied, setCopied] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && tripId) {
-      setInviteLink(window.location.origin + '/invite/' + tripId);
+      setInviteLink(`${window.location.origin}/invite/${tripId}`);
     }
   }, [tripId]);
 
-  const handleCopy = async () => {
+  async function handleAdd() {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    await addBuddy({ name: trimmed, email: email.trim() || undefined });
+    setName('');
+    setEmail('');
+    toast.success(`${trimmed} added`);
+  }
+
+  async function handleRemove(buddy: BuddyRow) {
+    await removeBuddy(buddy.id);
+    toast.success(`${buddy.name} removed`);
+  }
+
+  async function handleCopy() {
     if (!inviteLink) return;
     try {
       await navigator.clipboard.writeText(inviteLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback for older browsers
-      const input = document.createElement('input');
-      input.value = inviteLink;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      document.body.removeChild(input);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.error('Failed to copy');
     }
-  };
+  }
+
+  const activeBuddies = buddies.filter((b) => b.status === 'active');
+  const invitedBuddies = buddies.filter((b) => b.status === 'invited');
 
   return (
-    <Modal title="Trip Buddies" isOpen={isOpen} onClose={onClose}>
-      <div className={styles.inviteSection}>
-        <label className={styles.inviteLabel}>Invite link</label>
-        <div className={styles.inviteRow}>
-          <input
-            type="text"
-            className={styles.inviteInput}
-            value={inviteLink}
-            readOnly
-          />
-          <button
-            type="button"
-            className={`${styles.copyBtn} ${copied ? styles.copyBtnCopied : ''}`}
-            onClick={handleCopy}
-          >
-            {copied ? 'Copied!' : 'Copy'}
-          </button>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[460px]">
+        <DialogHeader>
+          <DialogTitle>Travelers</DialogTitle>
+        </DialogHeader>
+
+        <div className={styles.section}>
+          <Label className={styles.sectionLabel}>Add a traveler</Label>
+          <div className={styles.addForm}>
+            <Input
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            />
+            <Input
+              placeholder="Email (optional)"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            />
+            <Button onClick={handleAdd} disabled={!name.trim()} size="sm">
+              <UserPlus size={15} />
+              Add
+            </Button>
+          </div>
         </div>
-      </div>
-      <label className={styles.membersLabel}>Current members</label>
-      <div className={styles.membersList}>
-        {BUDDIES.map((buddy) => (
-          <div key={buddy.id} className={styles.memberRow}>
-            <div
-              className={styles.avatar}
-              style={{ backgroundColor: buddy.color }}
-            >
-              {buddy.avatar}
-            </div>
-            <div className={styles.memberInfo}>
-              <div className={styles.memberName}>{buddy.name}</div>
-              <span className={styles.editorTag}>Editor</span>
+
+        {activeBuddies.length > 0 && (
+          <div className={styles.section}>
+            <Label className={styles.sectionLabel}>
+              Members ({activeBuddies.length})
+            </Label>
+            <div className={styles.membersList}>
+              {activeBuddies.map((buddy) => (
+                <div key={buddy.id} className={styles.memberRow}>
+                  <div
+                    className={styles.avatar}
+                    style={{ backgroundColor: buddy.color }}
+                  >
+                    {buddy.avatar ?? buddy.name[0]}
+                  </div>
+                  <div className={styles.memberInfo}>
+                    <div className={styles.memberName}>{buddy.name}</div>
+                    <span className={styles.roleTag}>{buddy.role}</span>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className={styles.removeBtn}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove {buddy.name}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          They will lose access to this trip.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleRemove(buddy)}>
+                          Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </Modal>
+        )}
+
+        {invitedBuddies.length > 0 && (
+          <div className={styles.section}>
+            <Label className={styles.sectionLabel}>
+              Invited ({invitedBuddies.length})
+            </Label>
+            <div className={styles.membersList}>
+              {invitedBuddies.map((buddy) => (
+                <div key={buddy.id} className={styles.memberRow}>
+                  <div className={styles.avatarInvited}>
+                    <Mail size={14} />
+                  </div>
+                  <div className={styles.memberInfo}>
+                    <div className={styles.memberName}>{buddy.name}</div>
+                    {buddy.email && (
+                      <span className={styles.memberEmail}>{buddy.email}</span>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={styles.removeBtn}
+                    onClick={() => handleRemove(buddy)}
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {buddies.length === 0 && (
+          <div className={styles.emptyState}>
+            <UserPlus size={24} strokeWidth={1.5} />
+            <p>No travelers yet. Add someone above to get started.</p>
+          </div>
+        )}
+
+        <div className={styles.section}>
+          <Label className={styles.sectionLabel}>
+            <Link2 size={13} /> Invite link
+          </Label>
+          <div className={styles.inviteRow}>
+            <Input value={inviteLink} readOnly className={styles.inviteInput} />
+            <Button variant="outline" size="sm" onClick={handleCopy}>
+              {copied ? <Check size={14} /> : <Copy size={14} />}
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

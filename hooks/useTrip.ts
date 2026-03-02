@@ -101,3 +101,14 @@ export function useItinerary(tripId: string) {
 
   return { itinerary, isLoading, error, updateItinerary, addSegment, removeSegment };
 }
+
+export function useTripCities(tripId: string) {
+  const { data } = useSWR(
+    tripId ? `cities-${tripId}` : null,
+    async () => {
+      const segments = await fetchItinerary(tripId);
+      return segments.map((s) => s.city);
+    },
+  );
+  return data ?? [];
+}

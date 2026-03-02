@@ -47,6 +47,9 @@ export async function createTrip(input: CreateTripInput): Promise<string | null>
     console.error('[createTrip] Supabase not configured');
     return null;
   }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from('trips')
     .insert({
@@ -54,6 +57,7 @@ export async function createTrip(input: CreateTripInput): Promise<string | null>
       start_date: input.start_date ?? null,
       end_date: input.end_date ?? null,
       cover_city: input.cover_city ?? null,
+      owner_id: user?.id ?? null,
     })
     .select('id')
     .single();
@@ -61,7 +65,23 @@ export async function createTrip(input: CreateTripInput): Promise<string | null>
     console.error('[createTrip] Supabase error:', error.message, error.details, error.hint);
     return null;
   }
-  return (data as { id: string }).id;
+
+  const tripId = (data as { id: string }).id;
+
+  if (user) {
+    await supabase.from('buddies').insert({
+      trip_id: tripId,
+      user_id: user.id,
+      name: user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'Owner',
+      email: user.email,
+      avatar: (user.user_metadata?.full_name ?? user.email ?? '?')[0].toUpperCase(),
+      color: '#3B82F6',
+      role: 'owner',
+      status: 'active',
+    });
+  }
+
+  return tripId;
 }
 
 export async function updateTrip(

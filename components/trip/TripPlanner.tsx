@@ -2,10 +2,12 @@
 
 import { useState, useCallback } from 'react';
 import type { ItinerarySegment } from '@/lib/constants';
-import { BUDDIES, fmtDate, addDays } from '@/lib/constants';
+import { fmtDate, addDays } from '@/lib/constants';
+import type { BuddyRow } from '@/hooks/useBuddies';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { CityAutocomplete } from '@/components/ui/CityAutocomplete';
 import {
   Dialog,
   DialogContent,
@@ -31,9 +33,10 @@ export interface TripPlannerProps {
   onSave: (updated: ItinerarySegment[]) => void;
   onAddSegment?: (partial: Partial<ItinerarySegment>) => void;
   onRemoveSegment?: (segId: string) => void;
+  buddies?: BuddyRow[];
 }
 
-export function TripPlanner({ itinerary, onSave, onAddSegment, onRemoveSegment }: TripPlannerProps) {
+export function TripPlanner({ itinerary, onSave, onAddSegment, onRemoveSegment, buddies = [] }: TripPlannerProps) {
   const [editMode, setEditMode] = useState(false);
   const [editIt, setEditIt] = useState<ItinerarySegment[]>([]);
   const [showAddSegment, setShowAddSegment] = useState(false);
@@ -238,22 +241,24 @@ export function TripPlanner({ itinerary, onSave, onAddSegment, onRemoveSegment }
         </Button>
       )}
 
-      <div className={styles.buddiesSection}>
-        <div className={styles.buddiesTitle}>Travellers</div>
-        <div className={styles.buddiesList}>
-          {BUDDIES.map((b) => (
-            <div key={b.id} className={styles.buddy}>
-              <div
-                className={styles.buddyAvatar}
-                style={{ backgroundColor: b.color }}
-              >
-                {b.avatar}
+      {buddies.length > 0 && (
+        <div className={styles.buddiesSection}>
+          <div className={styles.buddiesTitle}>Travellers</div>
+          <div className={styles.buddiesList}>
+            {buddies.map((b) => (
+              <div key={b.id} className={styles.buddy}>
+                <div
+                  className={styles.buddyAvatar}
+                  style={{ backgroundColor: b.color }}
+                >
+                  {b.avatar ?? b.name[0]}
+                </div>
+                <span className={styles.buddyName}>{b.name}</span>
               </div>
-              <span className={styles.buddyName}>{b.name}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <Dialog open={showAddSegment} onOpenChange={setShowAddSegment}>
         <DialogContent>
@@ -269,11 +274,16 @@ export function TripPlanner({ itinerary, onSave, onAddSegment, onRemoveSegment }
           >
             <div className="grid gap-2">
               <Label htmlFor="seg-city">City</Label>
-              <Input
+              <CityAutocomplete
                 id="seg-city"
                 value={newCity}
-                onChange={(e) => setNewCity(e.target.value)}
-                placeholder="e.g. Bangkok"
+                onChange={setNewCity}
+                onSelect={(city, country, flag) => {
+                  setNewCity(city);
+                  setNewCountry(country);
+                  setNewFlag(flag);
+                }}
+                placeholder="Search for a city…"
                 required
               />
             </div>
@@ -284,16 +294,17 @@ export function TripPlanner({ itinerary, onSave, onAddSegment, onRemoveSegment }
                   id="seg-country"
                   value={newCountry}
                   onChange={(e) => setNewCountry(e.target.value)}
-                  placeholder="e.g. Thailand"
+                  placeholder="Auto-filled"
+                  readOnly
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="seg-flag">Flag emoji</Label>
+                <Label htmlFor="seg-flag">Flag</Label>
                 <Input
                   id="seg-flag"
                   value={newFlag}
-                  onChange={(e) => setNewFlag(e.target.value)}
-                  placeholder="e.g. 🇹🇭"
+                  readOnly
+                  placeholder="Auto"
                 />
               </div>
             </div>

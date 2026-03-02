@@ -1,110 +1,128 @@
-.inviteSection {
-  margin-bottom: var(--space-6);
+.section {
+  margin-top: var(--space-4);
 }
 
-.inviteLabel {
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: var(--space-2);
-  display: block;
 }
 
-.inviteRow {
+.addForm {
   display: flex;
+  flex-direction: column;
   gap: var(--space-2);
-  align-items: center;
 }
 
-.inviteInput {
-  flex: 1;
-  padding: var(--space-2) var(--space-3);
-  font-family: var(--font-body);
-  font-size: 0.9375rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
-  color: var(--color-text);
-}
-
-.copyBtn {
-  padding: var(--space-2) var(--space-4);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  background: var(--color-primary);
-  color: #FFFFFF;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-  white-space: nowrap;
-}
-
-.copyBtn:hover {
-  background: var(--color-primary-hover);
-}
-
-.copyBtnCopied {
-  background: var(--color-tag-green);
-  color: #FFFFFF;
-}
-
-.membersLabel {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: var(--space-3);
-  display: block;
+.addForm button {
+  align-self: flex-end;
 }
 
 .membersList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 2px;
 }
 
 .memberRow {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.memberRow:hover {
+  background: var(--color-bg-secondary);
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #fff;
   flex-shrink: 0;
 }
 
+.avatarInvited {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-subtle);
+  flex-shrink: 0;
+}
+
 .memberInfo {
   flex: 1;
+  min-width: 0;
 }
 
 .memberName {
-  font-weight: 600;
-  font-size: 0.9375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
   color: var(--color-text);
 }
 
-.editorTag {
-  display: inline-block;
-  margin-top: var(--space-1);
-  padding: var(--space-1) var(--space-2);
+.memberEmail {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+}
+
+.roleTag {
   font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  background: var(--color-tag-blue-bg);
-  color: var(--color-tag-blue);
-  border-radius: var(--radius-sm);
+  color: var(--color-text-subtle);
+  text-transform: capitalize;
+}
+
+.removeBtn {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.memberRow:hover .removeBtn {
+  opacity: 1;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  color: var(--color-text-subtle);
+  text-align: center;
+}
+
+.emptyState p {
+  font-size: 0.8125rem;
+  max-width: 220px;
+}
+
+.inviteRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.inviteInput {
+  flex: 1;
+  font-size: 0.8125rem;
 }

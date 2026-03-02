@@ -8,6 +8,7 @@ create table if not exists trips (
   start_date date,
   end_date date,
   cover_city text,
+  owner_id uuid references auth.users(id),
   created_at timestamptz default now()
 );
 
@@ -108,14 +109,17 @@ create table if not exists expenses (
   created_at timestamptz default now()
 );
 
--- Buddies
+-- Buddies (trip travelers)
 create table if not exists buddies (
   id serial primary key,
   trip_id uuid references trips(id) on delete cascade,
+  user_id uuid references auth.users(id),
   name text not null,
+  email text,
   avatar text,
   color text,
-  role text default 'editor'
+  role text default 'editor',
+  status text default 'active'
 );
 
 -- Row Level Security (enable on all tables)

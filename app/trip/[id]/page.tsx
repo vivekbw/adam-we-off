@@ -17,6 +17,7 @@ import { useStays } from '@/hooks/useStays';
 import { useActivities } from '@/hooks/useActivities';
 import { useNotes } from '@/hooks/useNotes';
 import { useExpenses } from '@/hooks/useExpenses';
+import { useBuddies } from '@/hooks/useBuddies';
 import { useTripDetail, updateTrip } from '@/hooks/useTrips';
 import { fmtDate, daysBetween } from '@/lib/constants';
 import styles from './page.module.css';
@@ -92,7 +93,7 @@ function EditableTripName({ tripId, name }: { tripId: string; name: string }) {
   );
 }
 
-function EditableDates({ tripId, startDate, endDate }: { tripId: string; startDate: string | null; endDate: string | null }) {
+function EditableDates({ tripId, startDate, endDate, totalDays }: { tripId: string; startDate: string | null; endDate: string | null; totalDays: number }) {
   const [editingStart, setEditingStart] = useState(false);
   const [editingEnd, setEditingEnd] = useState(false);
   const [start, setStart] = useState(startDate ?? '');
@@ -169,6 +170,9 @@ function EditableDates({ tripId, startDate, endDate }: { tripId: string; startDa
           {end ? fmtDate(end) : 'Set end date'}
         </span>
       )}
+      {start && end && daysBetween(start, end) > 0 && (
+        <span className={styles.duration}>· {daysBetween(start, end)} days</span>
+      )}
     </div>
   );
 }
@@ -184,6 +188,7 @@ export default function TripPage() {
   const { activities } = useActivities(id);
   const { notes } = useNotes(id);
   const { expenses, updateExpenses } = useExpenses(id);
+  const { buddies } = useBuddies(id);
 
   const [showBuddies, setShowBuddies] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
@@ -252,13 +257,9 @@ export default function TripPage() {
               tripId={id}
               startDate={trip.start_date}
               endDate={trip.end_date}
+              totalDays={totalDays}
             />
           )}
-          <p className={styles.dates}>
-            {itinerary.length > 0
-              ? `${fmtDate(itinerary[0].startDate)} – ${fmtDate(itinerary[itinerary.length - 1].endDate)} · ${totalDays} days`
-              : ''}
-          </p>
         </div>
 
         <TimelineStrip itinerary={itinerary} />
@@ -291,6 +292,7 @@ export default function TripPage() {
               onSave={updateItinerary}
               onAddSegment={addSegment}
               onRemoveSegment={removeSegment}
+              buddies={buddies}
             />
           </div>
         </div>
@@ -303,6 +305,7 @@ export default function TripPage() {
         onClose={() => setShowSplit(false)}
         expenses={expenses}
         onUpdateExpenses={(updated) => updateExpenses(updated)}
+        buddies={buddies}
       />
     </div>
   );

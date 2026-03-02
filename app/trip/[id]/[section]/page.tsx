@@ -13,6 +13,7 @@ import { useFlights } from '@/hooks/useFlights';
 import { useStays } from '@/hooks/useStays';
 import { useActivities } from '@/hooks/useActivities';
 import { useNotes } from '@/hooks/useNotes';
+import { useBuddies } from '@/hooks/useBuddies';
 import { useTripDetail } from '@/hooks/useTrips';
 import styles from './page.module.css';
 
@@ -46,6 +47,8 @@ export default function SectionPage() {
   const { stays, updateStay, addStay, deleteStay } = useStays(id);
   const { activities, updateActivity, addActivity, deleteActivity } = useActivities(id);
   const { notes, addNote, editNote, deleteNote } = useNotes(id);
+  const { buddies } = useBuddies(id);
+  const buddyNames = buddies.map((b) => b.name);
 
   if (!isValidSection(section)) {
     return (
@@ -75,6 +78,7 @@ export default function SectionPage() {
             flights={flights}
             onAddFlight={addFlight}
             onDeleteFlight={deleteFlight}
+            itinerary={itinerary}
           />
         );
       case 'stays':
@@ -85,6 +89,7 @@ export default function SectionPage() {
             onAddStay={addStay}
             onDeleteStay={deleteStay}
             itinerary={itinerary}
+            buddyNames={buddyNames}
           />
         );
       case 'activities':
@@ -95,6 +100,7 @@ export default function SectionPage() {
             onAddActivity={addActivity}
             onDeleteActivity={deleteActivity}
             itinerary={itinerary}
+            buddyNames={buddyNames}
           />
         );
       case 'notes':
@@ -104,6 +110,7 @@ export default function SectionPage() {
             onAddNote={addNote}
             onEditNote={editNote}
             onDeleteNote={deleteNote}
+            buddyNames={buddyNames}
           />
         );
       default:

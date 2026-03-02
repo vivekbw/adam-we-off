@@ -300,3 +300,191 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Leaflet flight map — city markers */
+.flight-city-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.flight-city-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2563EB;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transform: translate(-5px, -5px);
+}
+
+.flight-city-label {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(calc(-50% - 5px));
+  background: rgba(255, 255, 255, 0.94);
+  color: #0F172A;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  border: 1px solid #e2e8f0;
+}
+
+/* Leaflet flight map — route number badges */
+.flight-route-num {
+  background: none !important;
+  border: none !important;
+}
+
+.flight-route-num-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2563EB;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
+  border: 2px solid #fff;
+}
+
+/* Leaflet zoom controls */
+.leaflet-control-zoom a {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(8px);
+  color: #334155 !important;
+  border-color: #e2e8f0 !important;
+  font-size: 14px !important;
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #fff !important;
+  color: #0f172a !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  font-family: var(--font-body) !important;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px !important;
+  font-size: 13px !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none !important;
+}
+
+/* Chat markdown typography */
+.chat-markdown h1 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+.chat-markdown h1:first-child { margin-top: 0; }
+
+.chat-markdown h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.375rem;
+  line-height: 1.4;
+  color: var(--color-text-muted, #64748b);
+}
+
+.chat-markdown h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.chat-markdown p {
+  margin-bottom: 0.5rem;
+}
+.chat-markdown p:last-child { margin-bottom: 0; }
+
+.chat-markdown strong {
+  font-weight: 600;
+}
+
+.chat-markdown em {
+  font-style: italic;
+}
+
+.chat-markdown ul,
+.chat-markdown ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.chat-markdown ul { list-style-type: disc; }
+.chat-markdown ol { list-style-type: decimal; }
+
+.chat-markdown li {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
+
+.chat-markdown li > p {
+  margin-bottom: 0;
+}
+
+.chat-markdown code {
+  font-size: 0.8125rem;
+  background: var(--color-bg-secondary, #f1f5f9);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+}
+
+.chat-markdown pre {
+  background: var(--color-bg-secondary, #f1f5f9);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.chat-markdown pre code {
+  background: none;
+  padding: 0;
+}
+
+.chat-markdown blockquote {
+  border-left: 3px solid var(--color-border, #e2e8f0);
+  padding-left: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+  margin: 0.5rem 0;
+}
+
+.chat-markdown hr {
+  border: none;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  margin: 0.75rem 0;
+}
+
+.chat-markdown a {
+  color: var(--color-primary, #2563eb);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.chat-markdown a:hover {
+  text-decoration-thickness: 2px;
+}

@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { CityAutocomplete } from '@/components/ui/CityAutocomplete';
 import { createTrip, type CreateTripInput } from '@/hooks/useTrips';
 
 interface NewTripModalProps {
@@ -119,12 +120,12 @@ export function NewTripModal({ open, onOpenChange }: NewTripModalProps) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="cover-city">Cover city</Label>
-            <Input
+            <CityAutocomplete
               id="cover-city"
               value={coverCity}
-              onChange={(e) => setCoverCity(e.target.value)}
-              placeholder="e.g. Paris"
-              disabled={isSubmitting}
+              onChange={setCoverCity}
+              onSelect={(city) => setCoverCity(city)}
+              placeholder="Search for a city…"
             />
           </div>
           <DialogFooter>

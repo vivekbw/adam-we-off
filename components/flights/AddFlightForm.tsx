@@ -17,22 +17,30 @@ interface AddFlightFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: (partial: Partial<Flight>) => void;
+  defaults?: Partial<Flight>;
 }
 
-const initialForm = {
-  from: '',
-  fromCode: '',
-  to: '',
-  toCode: '',
-  date: '',
-  dep: '',
-  arr: '',
-  airline: '',
-  cost: '',
-};
+function makeInitial(defaults?: Partial<Flight>) {
+  return {
+    from: defaults?.from ?? '',
+    fromCode: defaults?.fromCode ?? '',
+    to: defaults?.to ?? '',
+    toCode: defaults?.toCode ?? '',
+    date: '',
+    dep: '',
+    arr: '',
+    airline: '',
+    cost: '',
+  };
+}
 
-export function AddFlightForm({ open, onOpenChange, onAdd }: AddFlightFormProps) {
-  const [form, setForm] = useState(initialForm);
+export function AddFlightForm({ open, onOpenChange, onAdd, defaults }: AddFlightFormProps) {
+  const [form, setForm] = useState(makeInitial(defaults));
+  const [prevDefaults, setPrevDefaults] = useState(defaults);
+  if (defaults !== prevDefaults) {
+    setPrevDefaults(defaults);
+    setForm(makeInitial(defaults));
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +66,7 @@ export function AddFlightForm({ open, onOpenChange, onAdd }: AddFlightFormProps)
       seats: {},
     });
 
-    setForm(initialForm);
+    setForm(makeInitial());
   };
 
   const update = (key: keyof typeof form, value: string) => {

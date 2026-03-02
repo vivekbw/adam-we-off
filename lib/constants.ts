@@ -44,15 +44,6 @@ export const NOTE_COLORS: Record<string, { bg: string; border: string; text: str
   Other: { bg: "#F3F4F6", border: "#D1D5DB", text: "#374151" },
 };
 
-// ── BUDDIES ───────────────────────────────────────────────────────────────────
-
-export const BUDDIES: Buddy[] = [
-  { id: 1, name: "Adam", avatar: "A", color: "#3B82F6" },
-  { id: 2, name: "Kate", avatar: "K", color: "#10B981" },
-  { id: 3, name: "Vienna", avatar: "V", color: "#8B5CF6" },
-  { id: 4, name: "You", avatar: "Y", color: "#F59E0B" },
-];
-
 // ── TYPESCRIPT INTERFACES ─────────────────────────────────────────────────────
 
 export interface Trip {
@@ -140,12 +131,6 @@ export interface Expense {
   category: string;
 }
 
-export interface Buddy {
-  id: number;
-  name: string;
-  avatar: string;
-  color: string;
-}
 
 // ── SEED DATA ─────────────────────────────────────────────────────────────────
 

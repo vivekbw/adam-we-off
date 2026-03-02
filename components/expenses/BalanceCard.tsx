@@ -1,18 +1,19 @@
 'use client';
 
 import type { Expense } from '@/lib/constants';
-import { BUDDIES } from '@/lib/constants';
+import type { BuddyRow } from '@/hooks/useBuddies';
 import styles from './BalanceCard.module.css';
 
 export interface BalanceCardProps {
   expenses: Expense[];
+  buddies?: BuddyRow[];
 }
 
-export function BalanceCard({ expenses }: BalanceCardProps) {
-  const buddyMap = new Map(BUDDIES.map((b) => [b.name, b]));
+export function BalanceCard({ expenses, buddies = [] }: BalanceCardProps) {
+  const buddyMap = new Map(buddies.map((b) => [b.name, b]));
 
   const balances = new Map<string, number>();
-  for (const b of BUDDIES) {
+  for (const b of buddies) {
     balances.set(b.name, 0);
   }
 
@@ -74,6 +75,9 @@ export function BalanceCard({ expenses }: BalanceCardProps) {
           );
         })}
       </div>
+      {buddies.length === 0 && (
+        <p className={styles.emptyHint}>Add travelers to see balances</p>
+      )}
       <div className={styles.summary}>
         <div className={styles.summaryRow}>
           <span>Total tracked</span>

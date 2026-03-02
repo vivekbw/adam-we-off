@@ -1,21 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, MapPin, CheckCircle2, Circle } from 'lucide-react';
 import type { Activity, ItinerarySegment } from '@/lib/constants';
 import { fmtDate } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
 import { ActivityCard } from './ActivityCard';
 import { AddActivityForm } from './AddActivityForm';
 import styles from './ActivitiesSection.module.css';
-
-const VIBES = ['All', 'Active', 'Relaxing', 'Adventurous', 'Food', 'Culture'];
-
-const ACTIVITY_VIBE_MAP: Record<string, string[]> = {
-  Active: ['sport', 'hike', 'bike', 'motorbike', 'muay thai', 'baseball', 'sumo'],
-  Relaxing: ['spa', 'yoga', 'beach', 'sunset', 'boat'],
-  Adventurous: ['tour', 'loop', 'motorbike', 'adventure'],
-  Food: ['food', 'cooking', 'street food', 'tour'],
-  Culture: ['temple', 'monkey', 'fire dance', 'teamlab', 'shibuya', 'sacred'],
-};
 
 export interface ActivitiesSectionProps {
   activities: Activity[];
@@ -23,6 +16,7 @@ export interface ActivitiesSectionProps {
   onAddActivity?: (activity: Partial<Activity>) => void;
   onDeleteActivity?: (id: string) => void;
   itinerary: ItinerarySegment[];
+  buddyNames?: string[];
 }
 
 export function ActivitiesSection({
@@ -31,8 +25,10 @@ export function ActivitiesSection({
   onAddActivity,
   onDeleteActivity,
   itinerary,
+  buddyNames = [],
 }: ActivitiesSectionProps) {
-  const [vibeFilter, setVibeFilter] = useState<string>('All');
+  const [activeCityIdx, setActiveCityIdx] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   const citySegments = useMemo(() => {
     const map = new Map<string, ItinerarySegment>();
@@ -44,18 +40,9 @@ export function ActivitiesSection({
     );
   }, [itinerary]);
 
-  const filteredActivities = useMemo(() => {
-    if (vibeFilter === 'All') return activities;
-    const keywords = ACTIVITY_VIBE_MAP[vibeFilter];
-    if (!keywords) return activities;
-    return activities.filter((a) =>
-      keywords.some((k) => a.name.toLowerCase().includes(k))
-    );
-  }, [activities, vibeFilter]);
-
   const activitiesByCity = useMemo(() => {
     const grouped: Record<string, Activity[]> = {};
-    for (const act of filteredActivities) {
+    for (const act of activities) {
       if (!grouped[act.city]) grouped[act.city] = [];
       grouped[act.city].push(act);
     }
@@ -65,9 +52,26 @@ export function ActivitiesSection({
       );
     }
     return grouped;
-  }, [filteredActivities]);
+  }, [activities]);
 
-  const handleAddActivity = (city: string, seg: ItinerarySegment) => {
+  const currentSeg = citySegments[activeCityIdx];
+  const currentActivities = currentSeg ? (activitiesByCity[currentSeg.city] ?? []) : [];
+  const bookedCount = currentActivities.filter((a) => a.status === 'Booked').length;
+
+  const navigate = useCallback((idx: number) => {
+    setDirection(idx > activeCityIdx ? 1 : -1);
+    setActiveCityIdx(idx);
+  }, [activeCityIdx]);
+
+  const goPrev = useCallback(() => {
+    if (activeCityIdx > 0) navigate(activeCityIdx - 1);
+  }, [activeCityIdx, navigate]);
+
+  const goNext = useCallback(() => {
+    if (activeCityIdx < citySegments.length - 1) navigate(activeCityIdx + 1);
+  }, [activeCityIdx, citySegments.length, navigate]);
+
+  const handleAddActivity = useCallback((city: string, seg: ItinerarySegment) => {
     return (partial: Partial<Activity>) => {
       if (!onAddActivity) return;
       onAddActivity({
@@ -78,61 +82,149 @@ export function ActivitiesSection({
         date: seg.startDate,
       });
     };
-  };
+  }, [onAddActivity]);
+
+  if (citySegments.length === 0) {
+    return (
+      <section className={styles.section}>
+        <div className={styles.emptyState}>
+          <MapPin size={32} strokeWidth={1.5} />
+          <p>Add cities to your itinerary to start planning activities.</p>
+        </div>
+      </section>
+    );
+  }
+
+  const totalAllBooked = activities.filter((a) => a.status === 'Booked').length;
 
   return (
     <section className={styles.section}>
-      <header className={styles.header}>
-        <h2 className={styles.title}>Activities</h2>
-        <p className={styles.subtitle}>
-          {activities.filter((a) => a.status === 'Booked').length} of{' '}
-          {activities.length} booked
-        </p>
+      <header className={styles.topHeader}>
+        <div>
+          <h2 className={styles.title}>Activities</h2>
+          <p className={styles.subtitle}>
+            {totalAllBooked} of {activities.length} booked across {citySegments.length} {citySegments.length === 1 ? 'city' : 'cities'}
+          </p>
+        </div>
       </header>
 
-      <div className={styles.vibeBar}>
-        {VIBES.map((v) => (
-          <button
-            key={v}
-            type="button"
-            className={`${styles.vibeBtn} ${vibeFilter === v ? styles.vibeBtnActive : ''}`}
-            onClick={() => setVibeFilter(v)}
-          >
-            {v}
-          </button>
-        ))}
-      </div>
+      <nav className={styles.cityNav}>
+        {citySegments.map((seg, i) => {
+          const cityActs = activitiesByCity[seg.city] ?? [];
+          const cityBooked = cityActs.filter((a) => a.status === 'Booked').length;
+          const isActive = i === activeCityIdx;
 
-      {citySegments.map((seg) => {
-        const cityActivities = activitiesByCity[seg.city] ?? [];
-        return (
-          <div key={seg.city} className={styles.cityGroup}>
-            <h3 className={styles.cityHeader}>
-              <span className={styles.cityFlag}>{seg.flag}</span>
-              {seg.city}
-              <span className={styles.cityDates}>
-                {fmtDate(seg.startDate)} – {fmtDate(seg.endDate)}
-              </span>
-            </h3>
-            <div className={styles.grid}>
-              {cityActivities.map((activity) => (
-                <ActivityCard
-                  key={activity.id}
-                  activity={activity}
-                  onUpdate={onUpdateActivity}
-                  onDelete={onDeleteActivity}
-                />
-              ))}
-              {onAddActivity && (
-                <AddActivityForm
-                  city={seg.city}
-                  onAdd={handleAddActivity(seg.city, seg)}
-                />
+          return (
+            <button
+              key={seg.city}
+              type="button"
+              className={`${styles.cityPill} ${isActive ? styles.cityPillActive : ''}`}
+              onClick={() => navigate(i)}
+            >
+              <span className={styles.pillFlag}>{seg.flag}</span>
+              <span className={styles.pillCity}>{seg.city}</span>
+              {cityActs.length > 0 && (
+                <span className={styles.pillCount}>
+                  {cityBooked}/{cityActs.length}
+                </span>
               )}
+            </button>
+          );
+        })}
+      </nav>
+
+      <AnimatePresence mode="wait" custom={direction}>
+        <motion.div
+          key={currentSeg.city}
+          custom={direction}
+          initial={{ opacity: 0, x: direction * 60 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: direction * -60 }}
+          transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className={styles.cityPanel}
+        >
+          <div className={styles.cityHeader}>
+            <div className={styles.cityInfo}>
+              <span className={styles.cityFlag}>{currentSeg.flag}</span>
+              <div>
+                <h3 className={styles.cityName}>{currentSeg.city}</h3>
+                <span className={styles.cityDates}>
+                  {fmtDate(currentSeg.startDate)} – {fmtDate(currentSeg.endDate)} · {currentSeg.nights} nights
+                </span>
+              </div>
+            </div>
+            <div className={styles.navArrows}>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={activeCityIdx === 0}
+                onClick={goPrev}
+                className={styles.arrowBtn}
+              >
+                <ChevronLeft size={18} />
+              </Button>
+              <span className={styles.pageIndicator}>
+                {activeCityIdx + 1} / {citySegments.length}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={activeCityIdx === citySegments.length - 1}
+                onClick={goNext}
+                className={styles.arrowBtn}
+              >
+                <ChevronRight size={18} />
+              </Button>
             </div>
           </div>
-        );
-      })}
+
+          {currentActivities.length > 0 && (
+            <div className={styles.progressRow}>
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{ width: `${currentActivities.length > 0 ? (bookedCount / currentActivities.length) * 100 : 0}%` }}
+                />
+              </div>
+              <div className={styles.progressLabels}>
+                <span className={styles.progressStat}>
+                  <CheckCircle2 size={13} />
+                  {bookedCount} booked
+                </span>
+                <span className={styles.progressStat}>
+                  <Circle size={13} />
+                  {currentActivities.length - bookedCount} considering
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className={styles.grid}>
+            {currentActivities.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                onUpdate={onUpdateActivity}
+                onDelete={onDeleteActivity}
+                buddyNames={buddyNames}
+              />
+            ))}
+            {onAddActivity && currentSeg && (
+              <AddActivityForm
+                city={currentSeg.city}
+                onAdd={handleAddActivity(currentSeg.city, currentSeg)}
+              />
+            )}
+          </div>
+
+          {currentActivities.length === 0 && (
+            <div className={styles.cityEmpty}>
+              <MapPin size={20} strokeWidth={1.5} />
+              <p>No activities planned for {currentSeg.city} yet.</p>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </section>
   );
 }

@@ -6,12 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import styles from './AddActivityForm.module.css';
 
-const POPULAR_RECS = [
-  { name: 'Street Food Tour', cost: 35, search: 'street+food+tour' },
-  { name: 'Temple Walk', cost: 15, search: 'temple+walk' },
-  { name: 'Cooking Class', cost: 55, search: 'cooking+class' },
-];
-
 export interface AddActivityFormProps {
   city: string;
   onAdd: (activity: Partial<Activity>) => void;
@@ -20,7 +14,7 @@ export interface AddActivityFormProps {
 export function AddActivityForm({ city, onAdd }: AddActivityFormProps) {
   const [input, setInput] = useState('');
 
-  const handleSearch = () => {
+  const handleAdd = () => {
     const val = input.trim();
     if (!val) return;
     const isUrl = val.startsWith('http://') || val.startsWith('https://');
@@ -35,63 +29,19 @@ export function AddActivityForm({ city, onAdd }: AddActivityFormProps) {
     setInput('');
   };
 
-  const handleAddPopular = (rec: (typeof POPULAR_RECS)[0]) => {
-    onAdd({
-      name: rec.name,
-      link: `https://www.viator.com/searchResults/?q=${rec.search}+${encodeURIComponent(city)}`,
-      cost: rec.cost,
-      status: 'Considering',
-      bookedBy: null,
-      individual: false,
-    });
-  };
-
   return (
     <div className={styles.card}>
       <div className={styles.inputRow}>
         <Input
           type="text"
-          placeholder="Activity name or link"
+          placeholder={`Add an activity in ${city}`}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         />
-        <Button size="sm" onClick={handleSearch}>
-          Search Activities
+        <Button size="sm" onClick={handleAdd}>
+          Add
         </Button>
-      </div>
-      <div className={styles.popularTitle}>Popular in {city}</div>
-      <div className={styles.popularList}>
-        {POPULAR_RECS.map((rec) => (
-          <div key={rec.name} className={styles.popularItem}>
-            <span className={styles.popularItemName}>{rec.name}</span>
-            <div className={styles.popularItemRight}>
-              <span className={styles.popularItemCost}>${rec.cost}</span>
-              <div className={styles.popularItemLinks}>
-                <a
-                  href={`https://www.viator.com/searchResults/?q=${rec.search}+${encodeURIComponent(city)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Viator
-                </a>
-                <a
-                  href={`https://www.airbnb.com/experiences?location=${encodeURIComponent(city)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Airbnb
-                </a>
-                <Button
-                  size="xs"
-                  onClick={() => handleAddPopular(rec)}
-                >
-                  Add
-                </Button>
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );

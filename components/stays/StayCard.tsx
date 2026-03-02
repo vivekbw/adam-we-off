@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import type { Stay } from '@/lib/constants';
 import {
-  BUDDIES,
   CITY_IMAGES,
   STAY_IMAGES,
   fmtDate,
@@ -59,9 +58,10 @@ export interface StayCardProps {
   onSelect: () => void;
   onUpdate: (id: string, changes: Partial<Stay>) => void;
   onDelete?: (id: string) => void;
+  buddyNames?: string[];
 }
 
-export function StayCard({ stay, isSelected, onSelect, onUpdate, onDelete }: StayCardProps) {
+export function StayCard({ stay, isSelected, onSelect, onUpdate, onDelete, buddyNames = [] }: StayCardProps) {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState(100);
   const [showMap, setShowMap] = useState(false);
@@ -71,7 +71,7 @@ export function StayCard({ stay, isSelected, onSelect, onUpdate, onDelete }: Sta
   const totalCost = stay.costPerNight * stay.nights;
 
   const bookedByOptions = [
-    ...BUDDIES.map((b) => ({ label: b.name, value: b.name })),
+    ...buddyNames.map((n) => ({ label: n, value: n })),
     { label: 'None', value: '' },
   ];
 
