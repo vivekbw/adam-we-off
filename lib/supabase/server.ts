@@ -27,4 +27,6 @@ export async function createSupabaseServer() {
   });
 }
 
+// Hi Adam!
+
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
