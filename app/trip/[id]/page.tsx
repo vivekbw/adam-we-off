@@ -297,7 +297,7 @@ export default function TripPage() {
       </main>
 
       <ChatPanel />
-      <BuddiesModal isOpen={showBuddies} onClose={() => setShowBuddies(false)} />
+      <BuddiesModal isOpen={showBuddies} onClose={() => setShowBuddies(false)} tripId={id} />
       <SplitModal
         isOpen={showSplit}
         onClose={() => setShowSplit(false)}

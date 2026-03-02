@@ -8,17 +8,18 @@ import styles from './BuddiesModal.module.css';
 export interface BuddiesModalProps {
   isOpen: boolean;
   onClose: () => void;
+  tripId?: string;
 }
 
-export function BuddiesModal({ isOpen, onClose }: BuddiesModalProps) {
+export function BuddiesModal({ isOpen, onClose, tripId }: BuddiesModalProps) {
   const [copied, setCopied] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setInviteLink(window.location.origin + '/invite/we-off-trip-123');
+    if (typeof window !== 'undefined' && tripId) {
+      setInviteLink(window.location.origin + '/invite/' + tripId);
     }
-  }, []);
+  }, [tripId]);
 
   const handleCopy = async () => {
     if (!inviteLink) return;
