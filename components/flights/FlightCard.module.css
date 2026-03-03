@@ -116,9 +116,59 @@
   color: var(--color-tag-green);
 }
 
-.tagYellow {
-  background-color: var(--color-tag-yellow-bg);
-  color: var(--color-tag-yellow);
+.tagOrange {
+  background-color: var(--color-tag-orange-bg);
+  color: var(--color-tag-orange);
+}
+
+/* ── Per-traveler booking status pills ── */
+
+.travelersRow {
+  margin-top: var(--space-2);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.travelerPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.travelerPill:hover {
+  transform: scale(1.05);
+}
+
+.pillBooked {
+  background-color: var(--color-tag-green-bg);
+  color: var(--color-tag-green);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.pillBooked:hover {
+  background-color: var(--color-tag-green);
+  color: white;
+}
+
+.pillNeedToBook {
+  background-color: var(--color-tag-orange-bg);
+  color: var(--color-tag-orange);
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+.pillNeedToBook:hover {
+  background-color: var(--color-tag-orange);
+  color: white;
 }
 
 .warningRow {

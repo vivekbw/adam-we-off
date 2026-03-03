@@ -138,8 +138,9 @@ export function TripPlanner({
     } else {
       onSave(recalculated);
     }
-    const endDate = tripEndProp
-      || (recalculated.length > 0 ? recalculated[recalculated.length - 1].endDate : '');
+    const endDate = recalculated.length > 0
+      ? recalculated[recalculated.length - 1].endDate
+      : (tripEndProp || '');
     if (endDate) {
       onTripDatesChange?.(localTripStart, endDate);
     }

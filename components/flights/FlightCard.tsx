@@ -27,12 +27,15 @@ export interface FlightCardProps {
   isSelected: boolean;
   onClick: () => void;
   onDelete?: (id: string) => void;
+  buddyNames?: string[];
+  onToggleBookingStatus?: (flightId: string, buddyName: string) => void;
 }
 
-export function FlightCard({ flight, isSelected, onClick, onDelete }: FlightCardProps) {
+export function FlightCard({ flight, isSelected, onClick, onDelete, buddyNames = [], onToggleBookingStatus }: FlightCardProps) {
   const warning = FLIGHT_WARNINGS[flight.id];
   const statusClass =
-    flight.status === 'Booked' ? styles.tagGreen : styles.tagYellow;
+    flight.status === 'Booked' ? styles.tagGreen : styles.tagOrange;
+  const travelerNames = buddyNames.length > 0 ? buddyNames : Object.keys(flight.bookingStatus ?? {});
 
   return (
     <div
@@ -81,6 +84,25 @@ export function FlightCard({ flight, isSelected, onClick, onDelete }: FlightCard
           <span className={styles.cost}>~${flight.cost} CAD</span>
         )}
       </div>
+      {travelerNames.length > 0 && (
+        <div className={styles.travelersRow} onClick={(e) => e.stopPropagation()}>
+          {travelerNames.map((name) => {
+            const status = flight.bookingStatus?.[name] ?? 'Need to Book';
+            const isBooked = status === 'Booked';
+            return (
+              <button
+                key={name}
+                type="button"
+                className={`${styles.travelerPill} ${isBooked ? styles.pillBooked : styles.pillNeedToBook}`}
+                onClick={() => onToggleBookingStatus?.(flight.id, name)}
+                title={`${name}: ${status} — click to toggle`}
+              >
+                {name}
+              </button>
+            );
+          })}
+        </div>
+      )}
       {Object.keys(flight.seats).length > 0 && (
         <div className={styles.seatsRow}>
           {Object.entries(flight.seats).map(([name, seat]) => (
