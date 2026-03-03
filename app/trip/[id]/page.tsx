@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
@@ -189,9 +189,40 @@ export default function TripPage() {
   const { notes } = useNotes(id);
   const { expenses, updateExpenses } = useExpenses(id);
   const { buddies } = useBuddies(id);
+  const buddyNames = buddies.map((b) => b.name);
 
   const [showBuddies, setShowBuddies] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
+
+  const handleBuddyAdded = useCallback(
+    (addedName: string) => {
+      if (expenses.length === 0) return;
+      const updated = expenses.map((e) => {
+        const isGroupExpense =
+          buddyNames.length === 0 || buddyNames.every((n) => e.split.includes(n));
+        if (isGroupExpense && !e.split.includes(addedName)) {
+          return { ...e, split: [...e.split, addedName] };
+        }
+        return e;
+      });
+      updateExpenses(updated);
+    },
+    [buddyNames, expenses, updateExpenses]
+  );
+
+  const handleBuddyRemoved = useCallback(
+    (removedName: string) => {
+      if (expenses.length === 0) return;
+      const remaining = buddyNames.filter((n) => n !== removedName);
+      const updated = expenses.map((e) => ({
+        ...e,
+        split: e.split.filter((s) => s !== removedName),
+        paidBy: e.paidBy === removedName ? (remaining[0] ?? e.paidBy) : e.paidBy,
+      }));
+      updateExpenses(updated);
+    },
+    [buddyNames, expenses, updateExpenses]
+  );
 
   const totalDays =
     itinerary.length > 0
@@ -293,13 +324,25 @@ export default function TripPage() {
               onAddSegment={addSegment}
               onRemoveSegment={removeSegment}
               buddies={buddies}
+              tripStartDate={trip?.start_date}
+              tripEndDate={trip?.end_date}
+              onTripDatesChange={async (start, end) => {
+                await updateTrip(id, { start_date: start, end_date: end });
+                mutateTripDetail();
+              }}
             />
           </div>
         </div>
       </main>
 
       <ChatPanel />
-      <BuddiesModal isOpen={showBuddies} onClose={() => setShowBuddies(false)} tripId={id} />
+      <BuddiesModal
+        isOpen={showBuddies}
+        onClose={() => setShowBuddies(false)}
+        tripId={id}
+        onBuddyAdded={handleBuddyAdded}
+        onBuddyRemoved={handleBuddyRemoved}
+      />
       <SplitModal
         isOpen={showSplit}
         onClose={() => setShowSplit(false)}

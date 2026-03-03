@@ -26,6 +26,96 @@
   margin-bottom: var(--space-6);
 }
 
+/* ── Suggested stays ── */
+
+.suggestions {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px dashed rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-lg);
+}
+
+.suggestLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #B45309;
+  margin-bottom: var(--space-3);
+}
+
+.suggestList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.suggestGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.suggestChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.suggestChip:hover {
+  border-color: var(--color-primary-hex);
+  background: var(--color-primary-muted);
+  color: var(--color-primary-hex);
+}
+
+.suggestChipActive {
+  border-color: var(--color-primary-hex);
+  background: var(--color-primary-hex);
+  color: white;
+}
+
+.suggestChipActive .suggestIcon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.suggestManual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 100%;
+  padding: 6px 0;
+  border: 1px solid var(--color-border);
+  border-left: none;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.suggestManual:hover {
+  background: var(--color-tag-green-bg);
+  color: var(--color-tag-green);
+  border-color: var(--color-tag-green);
+}
+
+.suggestIcon {
+  color: var(--color-text-subtle);
+  flex-shrink: 0;
+}
+
 .filterBar {
   display: flex;
   flex-direction: column;

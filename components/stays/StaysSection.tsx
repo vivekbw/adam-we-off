@@ -1,12 +1,57 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import type { Stay, ItinerarySegment } from '@/lib/constants';
+import { useState, useMemo, useCallback } from 'react';
+import { Search, Plus, Building2 } from 'lucide-react';
+import { daysBetween, type Stay, type ItinerarySegment } from '@/lib/constants';
 import { StayCoverage } from './StayCoverage';
 import { StayCard } from './StayCard';
 import { AddStayForm } from './AddStayForm';
+import { StaySearchResults } from './StaySearchResults';
+import { useStaySearch } from '@/hooks/useStaySearch';
 import { Button } from '@/components/ui/button';
 import styles from './StaysSection.module.css';
+
+interface SuggestedStay {
+  city: string;
+  flag: string;
+  country: string;
+  checkIn: string;
+  checkOut: string;
+}
+
+function computeSuggestedStays(
+  itinerary: ItinerarySegment[],
+  stays: Stay[]
+): SuggestedStay[] {
+  if (itinerary.length === 0) return [];
+
+  const sorted = [...itinerary].sort(
+    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+  );
+
+  const coveredCities = new Set(
+    stays.map((s) => s.city.toLowerCase())
+  );
+
+  const suggestions: SuggestedStay[] = [];
+  const seen = new Set<string>();
+
+  for (const seg of sorted) {
+    const key = seg.city.toLowerCase();
+    if (!coveredCities.has(key) && !seen.has(key)) {
+      seen.add(key);
+      suggestions.push({
+        city: seg.city,
+        flag: seg.flag,
+        country: seg.country,
+        checkIn: seg.startDate,
+        checkOut: seg.endDate,
+      });
+    }
+  }
+
+  return suggestions;
+}
 
 export interface StaysSectionProps {
   stays: Stay[];
@@ -15,6 +60,7 @@ export interface StaysSectionProps {
   onDeleteStay?: (id: string) => void;
   itinerary: ItinerarySegment[];
   buddyNames?: string[];
+  onAddExpense?: (expense: { description: string; amount: number; currency: string; paidBy: string; split: string[]; date: string; category: string }) => void;
 }
 
 export function StaysSection({
@@ -24,13 +70,22 @@ export function StaysSection({
   onDeleteStay,
   itinerary,
   buddyNames = [],
+  onAddExpense,
 }: StaysSectionProps) {
   const [selectedStayId, setSelectedStayId] = useState<string | null>(null);
   const [priceFilter, setPriceFilter] = useState(100);
   const [vibeFilter, setVibeFilter] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [activeSearch, setActiveSearch] = useState<SuggestedStay | null>(null);
+
+  const staySearch = useStaySearch();
 
   const bookedCount = stays.filter((s) => s.status === 'Booked').length;
+
+  const suggested = useMemo(
+    () => computeSuggestedStays(itinerary, stays),
+    [itinerary, stays]
+  );
 
   const VIBE_TYPE_MAP: Record<string, string[]> = {
     Social: ['Hostel'],
@@ -65,6 +120,46 @@ export function StaysSection({
     setSelectedStayId(stay.id);
   };
 
+  const handleSuggestClick = (suggestion: SuggestedStay) => {
+    setActiveSearch(suggestion);
+    staySearch.search(suggestion.city, suggestion.checkIn, suggestion.checkOut);
+  };
+
+  const handleManualAdd = (suggestion: SuggestedStay) => {
+    if (!onAddStay) return;
+    const nights = suggestion.checkIn && suggestion.checkOut
+      ? Math.max(1, daysBetween(suggestion.checkIn, suggestion.checkOut))
+      : 1;
+    onAddStay({
+      city: suggestion.city,
+      country: suggestion.country,
+      flag: suggestion.flag,
+      checkIn: suggestion.checkIn,
+      checkOut: suggestion.checkOut,
+      nights,
+      status: 'Need to Book',
+    });
+  };
+
+  const handleCloseSearch = useCallback(() => {
+    setActiveSearch(null);
+    staySearch.clear();
+  }, [staySearch]);
+
+  const handleAddFromSearch = useCallback(
+    (partial: Partial<Stay>) => {
+      if (onAddStay) {
+        if (activeSearch) {
+          partial.country = activeSearch.country;
+          partial.flag = activeSearch.flag;
+        }
+        onAddStay(partial);
+      }
+      handleCloseSearch();
+    },
+    [onAddStay, activeSearch, handleCloseSearch]
+  );
+
   return (
     <section className={styles.section}>
       <header className={styles.header}>
@@ -82,6 +177,54 @@ export function StaysSection({
       <div className={styles.coverage}>
         <StayCoverage stays={stays} onSegmentClick={handleSegmentClick} />
       </div>
+
+      {suggested.length > 0 && (
+        <div className={styles.suggestions}>
+          <p className={styles.suggestLabel}>Missing stays</p>
+          <div className={styles.suggestList}>
+            {suggested.map((s, i) => (
+              <div key={i} className={styles.suggestGroup}>
+                <button
+                  type="button"
+                  className={`${styles.suggestChip} ${
+                    activeSearch?.city === s.city
+                      ? styles.suggestChipActive
+                      : ''
+                  }`}
+                  onClick={() => handleSuggestClick(s)}
+                  title="Search for hotels &amp; hostels"
+                >
+                  <Search size={11} />
+                  <span>{s.flag} {s.city}</span>
+                  <Building2 size={13} className={styles.suggestIcon} />
+                </button>
+                {onAddStay && (
+                  <button
+                    type="button"
+                    className={styles.suggestManual}
+                    onClick={() => handleManualAdd(s)}
+                    title="Add stay manually"
+                  >
+                    <Plus size={12} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeSearch && (
+        <StaySearchResults
+          offers={staySearch.offers}
+          loading={staySearch.loading}
+          error={staySearch.error}
+          city={activeSearch.city}
+          flag={activeSearch.flag}
+          onClose={handleCloseSearch}
+          onAddStay={onAddStay ? handleAddFromSearch : undefined}
+        />
+      )}
 
       <div className={styles.filterBar}>
         <div className={styles.priceFilter}>
@@ -147,8 +290,25 @@ export function StaysSection({
           onOpenChange={setShowAdd}
           onAdd={(partial) => {
             onAddStay(partial);
+            if (partial.bookedBy && onAddExpense) {
+              const nights = partial.nights ?? 0;
+              const total = (partial.costPerNight ?? 0) * nights;
+              if (total > 0) {
+                onAddExpense({
+                  description: `${partial.name ?? 'Stay'} – ${partial.city ?? ''} (${nights}n)`,
+                  amount: total,
+                  currency: 'CAD',
+                  paidBy: partial.bookedBy,
+                  split: buddyNames,
+                  date: partial.checkIn ?? new Date().toISOString().slice(0, 10),
+                  category: 'Accommodation',
+                });
+              }
+            }
             setShowAdd(false);
           }}
+          itinerary={itinerary}
+          buddyNames={buddyNames}
         />
       )}
     </section>
