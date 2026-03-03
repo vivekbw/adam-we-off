@@ -499,38 +499,7 @@ export const SEED_NOTES: Note[] = [
   { id: "n5", type: "Health", icon: "💊", author: "All", content: "Malaria prophylaxis recommended for Vietnam & Indonesia" },
 ];
 
-export const SEED_EXPENSES: Expense[] = [
-  {
-    id: "e1",
-    description: "Tokyo Hostel (5 nights × 4 pax)",
-    amount: 3420,
-    currency: "CAD",
-    paidBy: "Kate",
-    split: ["Adam", "Kate", "Vienna", "You"],
-    date: "2026-05-24",
-    category: "Stay",
-  },
-  {
-    id: "e2",
-    description: "Ha Giang Loop Tour",
-    amount: 720,
-    currency: "CAD",
-    paidBy: "Vienna",
-    split: ["Adam", "Kate", "Vienna", "You"],
-    date: "2026-05-30",
-    category: "Activity",
-  },
-  {
-    id: "e3",
-    description: "CNX → BKK Flights",
-    amount: 560,
-    currency: "CAD",
-    paidBy: "Adam",
-    split: ["Adam", "Kate", "Vienna", "You"],
-    date: "2026-06-04",
-    category: "Flight",
-  },
-];
+export const SEED_EXPENSES: Expense[] = [];
 
 // ── HELPER FUNCTIONS ───────────────────────────────────────────────────────────
 
@@ -592,4 +561,94 @@ export function flightSearchLinks(
       price: null,
     },
   ];
+}
+
+// ── AMADEUS FLIGHT SEARCH ────────────────────────────────────────────────────
+
+export interface AmadeusFlightSegment {
+  carrierCode: string;
+  flightNumber: string;
+  departure: { iataCode: string; at: string };
+  arrival: { iataCode: string; at: string };
+}
+
+export interface AmadeusFlightOffer {
+  id: string;
+  price: string;
+  currency: string;
+  airline: string;
+  airlineCode: string;
+  departureTime: string;
+  arrivalTime: string;
+  departureDate: string;
+  stops: number;
+  duration: string;
+  originIata: string;
+  destIata: string;
+  segments: AmadeusFlightSegment[];
+  bookingLinks: {
+    googleFlights: string;
+    skyscanner: string;
+    expedia: string;
+  };
+}
+
+export function formatDuration(iso: string): string {
+  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  if (!match) return iso;
+  const h = match[1] ? `${match[1]}h` : "";
+  const m = match[2] ? ` ${match[2]}m` : "";
+  return `${h}${m}`.trim();
+}
+
+// ── AMADEUS HOTEL SEARCH ─────────────────────────────────────────────────────
+
+export interface AmadeusHotelOffer {
+  id: string;
+  hotelId: string;
+  hotelName: string;
+  cityCode: string;
+  checkInDate: string;
+  checkOutDate: string;
+  roomType: string;
+  roomDescription: string;
+  price: string;
+  pricePerNight: string;
+  currency: string;
+  cancellationPolicy: string | null;
+  paymentType: string;
+  bookingLinks: {
+    bookingDotCom: string;
+    expedia: string;
+    hostelworld: string;
+  };
+}
+
+export function stayBookingDeepLinks(
+  city: string,
+  checkIn: string,
+  checkOut: string,
+  guests: number = 4
+) {
+  const encoded = encodeURIComponent(city);
+  return {
+    bookingDotCom: `https://www.booking.com/searchresults.html?ss=${encoded}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${guests}`,
+    expedia: `https://www.expedia.ca/Hotel-Search?destination=${encoded}&startDate=${checkIn}&endDate=${checkOut}&adults=${guests}`,
+    hostelworld: `https://www.hostelworld.com/stays/?search_keywords=${encoded}&checkIn=${checkIn}&checkOut=${checkOut}`,
+  };
+}
+
+export function bookingDeepLinks(
+  originIata: string,
+  destIata: string,
+  date: string
+) {
+  const yy = date.slice(2, 4);
+  const mm = date.slice(5, 7);
+  const dd = date.slice(8, 10);
+  return {
+    googleFlights: `https://www.google.com/flights#flt=${originIata}.${destIata}.${date};c:CAD;e:1;sd:1;t:f`,
+    skyscanner: `https://www.skyscanner.ca/transport/flights/${originIata.toLowerCase()}/${destIata.toLowerCase()}/${yy}${mm}${dd}/`,
+    expedia: `https://www.expedia.ca/Flights-Search?flight-type=on&mode=search&trip=oneway&leg1=from%3A${originIata}%2Cto%3A${destIata}%2Cdeparture%3A${date}TANYT`,
+  };
 }

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Plane, Plus } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import { Plane, Plus, Search } from 'lucide-react';
 import type { Flight, ItinerarySegment } from '@/lib/constants';
 import { FlightCard } from './FlightCard';
 import { FlightDetail } from './FlightDetail';
 import { FlightGlobe } from './FlightGlobe';
 import { AddFlightForm } from './AddFlightForm';
+import { FlightSearchResults } from './FlightSearchResults';
+import { useFlightSearch } from '@/hooks/useFlightSearch';
 import { Button } from '@/components/ui/button';
 import styles from './FlightsSection.module.css';
 
@@ -22,6 +24,7 @@ interface SuggestedRoute {
   to: string;
   fromFlag: string;
   toFlag: string;
+  date: string;
 }
 
 function computeSuggestedRoutes(
@@ -56,6 +59,7 @@ function computeSuggestedRoutes(
         to: b.city,
         fromFlag: a.flag,
         toFlag: b.flag,
+        date: a.endDate,
       });
     }
   }
@@ -71,6 +75,9 @@ export function FlightsSection({
   const [selected, setSelected] = useState<Flight | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [addDefaults, setAddDefaults] = useState<Partial<Flight> | undefined>();
+  const [activeRoute, setActiveRoute] = useState<SuggestedRoute | null>(null);
+
+  const flightSearch = useFlightSearch();
 
   const suggested = useMemo(
     () => computeSuggestedRoutes(itinerary, flights),
@@ -82,6 +89,11 @@ export function FlightsSection({
   };
 
   const handleSuggestClick = (route: SuggestedRoute) => {
+    setActiveRoute(route);
+    flightSearch.search(route.from, route.to, route.date);
+  };
+
+  const handleManualAdd = (route: SuggestedRoute) => {
     setAddDefaults({
       from: route.from,
       to: route.to,
@@ -90,6 +102,25 @@ export function FlightsSection({
     });
     setShowAdd(true);
   };
+
+  const handleCloseSearch = useCallback(() => {
+    setActiveRoute(null);
+    flightSearch.clear();
+  }, [flightSearch]);
+
+  const handleAddFromSearch = useCallback(
+    (partial: Partial<Flight>) => {
+      if (onAddFlight) {
+        if (activeRoute) {
+          partial.fromFlag = activeRoute.fromFlag;
+          partial.toFlag = activeRoute.toFlag;
+        }
+        onAddFlight(partial);
+      }
+      handleCloseSearch();
+    },
+    [onAddFlight, activeRoute, handleCloseSearch]
+  );
 
   return (
     <div className={styles.page}>
@@ -115,19 +146,50 @@ export function FlightsSection({
           <p className={styles.suggestLabel}>Missing flights</p>
           <div className={styles.suggestList}>
             {suggested.map((r, i) => (
-              <button
-                key={i}
-                type="button"
-                className={styles.suggestChip}
-                onClick={() => handleSuggestClick(r)}
-              >
-                <span>{r.fromFlag} {r.from}</span>
-                <Plane size={13} className={styles.suggestPlane} />
-                <span>{r.toFlag} {r.to}</span>
-              </button>
+              <div key={i} className={styles.suggestGroup}>
+                <button
+                  type="button"
+                  className={`${styles.suggestChip} ${
+                    activeRoute?.from === r.from && activeRoute?.to === r.to && activeRoute?.date === r.date
+                      ? styles.suggestChipActive
+                      : ''
+                  }`}
+                  onClick={() => handleSuggestClick(r)}
+                  title="Search for cheap flights"
+                >
+                  <Search size={11} />
+                  <span>{r.fromFlag} {r.from}</span>
+                  <Plane size={13} className={styles.suggestPlane} />
+                  <span>{r.toFlag} {r.to}</span>
+                </button>
+                {onAddFlight && (
+                  <button
+                    type="button"
+                    className={styles.suggestManual}
+                    onClick={() => handleManualAdd(r)}
+                    title="Add flight manually"
+                  >
+                    <Plus size={12} />
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>
+      )}
+
+      {activeRoute && (
+        <FlightSearchResults
+          offers={flightSearch.offers}
+          loading={flightSearch.loading}
+          error={flightSearch.error}
+          fromCity={activeRoute.from}
+          toCity={activeRoute.to}
+          fromFlag={activeRoute.fromFlag}
+          toFlag={activeRoute.toFlag}
+          onClose={handleCloseSearch}
+          onAddFlight={onAddFlight ? handleAddFromSearch : undefined}
+        />
       )}
 
       <div className={styles.grid}>

@@ -30,9 +30,11 @@ export interface BuddiesModalProps {
   isOpen: boolean;
   onClose: () => void;
   tripId?: string;
+  onBuddyAdded?: (name: string) => void;
+  onBuddyRemoved?: (name: string) => void;
 }
 
-export function BuddiesModal({ isOpen, onClose, tripId }: BuddiesModalProps) {
+export function BuddiesModal({ isOpen, onClose, tripId, onBuddyAdded, onBuddyRemoved }: BuddiesModalProps) {
   const { buddies, addBuddy, removeBuddy } = useBuddies(tripId ?? '');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -52,11 +54,13 @@ export function BuddiesModal({ isOpen, onClose, tripId }: BuddiesModalProps) {
     setName('');
     setEmail('');
     toast.success(`${trimmed} added`);
+    onBuddyAdded?.(trimmed);
   }
 
   async function handleRemove(buddy: BuddyRow) {
     await removeBuddy(buddy.id);
     toast.success(`${buddy.name} removed`);
+    onBuddyRemoved?.(buddy.name);
   }
 
   async function handleCopy() {
