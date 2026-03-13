@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Expense } from '@/lib/constants';
 import { fmtDate } from '@/lib/constants';
 import styles from './ExpenseList.module.css';
@@ -33,9 +33,14 @@ export function ExpenseList({ expenses, buddyNames = [], onEdit, onDelete, onAdd
 
   const [addDesc, setAddDesc] = useState('');
   const [addAmount, setAddAmount] = useState('');
-  const [addPaidBy, setAddPaidBy] = useState('You');
-  const [addSplit, setAddSplit] = useState<string[]>(['Adam', 'Kate', 'Vienna', 'You']);
+  const [addPaidBy, setAddPaidBy] = useState(BUDDY_NAMES[0] ?? '');
+  const [addSplit, setAddSplit] = useState<string[]>(BUDDY_NAMES);
   const [addCategory, setAddCategory] = useState('Other');
+
+  useEffect(() => {
+    setAddPaidBy((prev) => (BUDDY_NAMES.includes(prev) ? prev : BUDDY_NAMES[0] ?? ''));
+    setAddSplit(BUDDY_NAMES);
+  }, [BUDDY_NAMES.join(',')]);
 
   const startEdit = (e: Expense) => {
     setEditingId(e.id);
@@ -89,8 +94,8 @@ export function ExpenseList({ expenses, buddyNames = [], onEdit, onDelete, onAdd
     });
     setAddDesc('');
     setAddAmount('');
-    setAddPaidBy('You');
-    setAddSplit(['Adam', 'Kate', 'Vienna', 'You']);
+    setAddPaidBy(BUDDY_NAMES[0] ?? '');
+    setAddSplit([...BUDDY_NAMES]);
     setAddCategory('Other');
     setShowAddForm(false);
   };

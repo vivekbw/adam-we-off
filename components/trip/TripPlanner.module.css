@@ -29,6 +29,128 @@
   margin-bottom: var(--space-4);
 }
 
+.tripDates {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  background-color: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.tripDatesOver {
+  border-color: #FECACA;
+  background-color: #FEF2F2;
+}
+
+.tripDatesLabel {
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+
+.tripDatesRange {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.tripDateClickable {
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tripDateClickable:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-primary);
+}
+
+.tripDateSep {
+  color: var(--color-text-subtle);
+  flex-shrink: 0;
+}
+
+.tripDateInput {
+  width: 120px;
+  padding: 1px 4px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  outline: none;
+}
+
+.tripDatesNights {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.tripWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-md);
+  font-size: 0.6875rem;
+  color: #991B1B;
+  line-height: 1.4;
+}
+
+.tripWarningIcon {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.tripGap {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  background-color: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-md);
+  font-size: 0.6875rem;
+  color: #92400E;
+  line-height: 1.4;
+}
+
+.tripGapIcon {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.tripComplete {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: var(--radius-md);
+  font-size: 0.6875rem;
+  color: #166534;
+  font-weight: 500;
+}
+
 .emptyState {
   text-align: center;
   padding: var(--space-6) var(--space-4);
@@ -58,6 +180,28 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.dragHandle {
+  color: var(--color-text-subtle);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: var(--space-1) 0;
+  transition: color var(--transition-fast);
+}
+
+.dragHandle:hover {
+  color: var(--color-text);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  opacity: 0;
 }
 
 .segmentFlag {
@@ -129,27 +273,6 @@
 .moveButtons {
   display: flex;
   gap: var(--space-1);
-}
-
-.moveBtn {
-  background-color: var(--color-bg-muted);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--space-1) var(--space-2);
-  font-size: 0.8125rem;
-  color: var(--color-text);
-  cursor: pointer;
-  font-family: var(--font-body);
-  transition: background-color var(--transition-fast);
-}
-
-.moveBtn:hover:not(:disabled) {
-  background-color: rgba(26, 39, 68, 0.08);
-}
-
-.moveBtn:disabled {
-  color: var(--color-text-subtle);
-  cursor: not-allowed;
 }
 
 .editBtn {
