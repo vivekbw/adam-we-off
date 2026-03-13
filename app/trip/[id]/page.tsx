@@ -13,11 +13,13 @@ import { ProgressRing } from '@/components/ui/ProgressRing';
 import { Input } from '@/components/ui/input';
 import { useItinerary } from '@/hooks/useTrip';
 import { useFlights } from '@/hooks/useFlights';
+import { deriveFlightStatus } from '@/lib/constants';
 import { useStays } from '@/hooks/useStays';
 import { useActivities } from '@/hooks/useActivities';
 import { useNotes } from '@/hooks/useNotes';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useBuddies } from '@/hooks/useBuddies';
+import { useExpenseBuddySync } from '@/hooks/useExpenseBuddySync';
 import { useTripDetail, updateTrip } from '@/hooks/useTrips';
 import { fmtDate, daysBetween } from '@/lib/constants';
 import styles from './page.module.css';
@@ -183,46 +185,48 @@ export default function TripPage() {
   const tripName = trip?.name ?? 'Loading…';
 
   const { itinerary, updateItinerary, addSegment, removeSegment } = useItinerary(id);
-  const { flights } = useFlights(id);
+  const { flights, updateFlights } = useFlights(id);
   const { stays } = useStays(id);
   const { activities } = useActivities(id);
   const { notes } = useNotes(id);
   const { expenses, updateExpenses } = useExpenses(id);
   const { buddies } = useBuddies(id);
-  const buddyNames = buddies.map((b) => b.name);
 
-  const [showBuddies, setShowBuddies] = useState(false);
-  const [showSplit, setShowSplit] = useState(false);
+  useExpenseBuddySync(buddies, expenses, updateExpenses);
+
+  const buddyNames = buddies.map((b) => b.name);
 
   const handleBuddyAdded = useCallback(
     (addedName: string) => {
-      if (expenses.length === 0) return;
-      const updated = expenses.map((e) => {
-        const isGroupExpense =
-          buddyNames.length === 0 || buddyNames.every((n) => e.split.includes(n));
-        if (isGroupExpense && !e.split.includes(addedName)) {
-          return { ...e, split: [...e.split, addedName] };
-        }
-        return e;
-      });
-      updateExpenses(updated);
+      if (flights.length > 0) {
+        const allNames = [...buddyNames, addedName];
+        const updatedFlights = flights.map((f) => {
+          if (f.bookingStatus?.[addedName]) return f;
+          const newBS = { ...f.bookingStatus, [addedName]: 'Need to Book' };
+          return { ...f, bookingStatus: newBS, status: deriveFlightStatus(newBS, allNames) };
+        });
+        updateFlights(updatedFlights);
+      }
     },
-    [buddyNames, expenses, updateExpenses]
+    [flights, updateFlights, buddyNames]
   );
 
   const handleBuddyRemoved = useCallback(
     (removedName: string) => {
-      if (expenses.length === 0) return;
-      const remaining = buddyNames.filter((n) => n !== removedName);
-      const updated = expenses.map((e) => ({
-        ...e,
-        split: e.split.filter((s) => s !== removedName),
-        paidBy: e.paidBy === removedName ? (remaining[0] ?? e.paidBy) : e.paidBy,
-      }));
-      updateExpenses(updated);
+      if (flights.length > 0) {
+        const remainingNames = buddyNames.filter((n) => n !== removedName);
+        const updatedFlights = flights.map((f) => {
+          const { [removedName]: _, ...rest } = f.bookingStatus ?? {};
+          return { ...f, bookingStatus: rest, status: deriveFlightStatus(rest, remainingNames) };
+        });
+        updateFlights(updatedFlights);
+      }
     },
-    [buddyNames, expenses, updateExpenses]
+    [flights, updateFlights, buddyNames]
   );
+
+  const [showBuddies, setShowBuddies] = useState(false);
+  const [showSplit, setShowSplit] = useState(false);
 
   const totalDays =
     itinerary.length > 0

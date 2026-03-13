@@ -6,6 +6,8 @@ import styles from './FlightDetail.module.css';
 
 export interface FlightDetailProps {
   flight: Flight;
+  buddyNames?: string[];
+  onUpdateBookingStatus?: (flightId: string, buddyName: string, newStatus: string) => void;
 }
 
 const ROWS: Array<[string, (f: Flight) => string]> = [
@@ -15,10 +17,11 @@ const ROWS: Array<[string, (f: Flight) => string]> = [
   ['Airline', (f) => f.airline],
 ];
 
-export function FlightDetail({ flight }: FlightDetailProps) {
+export function FlightDetail({ flight, buddyNames = [], onUpdateBookingStatus }: FlightDetailProps) {
   const links = flightSearchLinks(flight.fromCode, flight.toCode, flight.date);
   const statusClass =
-    flight.status === 'Booked' ? styles.tagGreen : styles.tagYellow;
+    flight.status === 'Booked' ? styles.tagGreen : styles.tagOrange;
+  const travelerNames = buddyNames.length > 0 ? buddyNames : Object.keys(flight.bookingStatus ?? {});
 
   return (
     <div className={styles.card}>
@@ -44,6 +47,30 @@ export function FlightDetail({ flight }: FlightDetailProps) {
           <span className={styles.rowValue}>{getValue(flight)}</span>
         </div>
       ))}
+      {travelerNames.length > 0 && (
+        <div className={styles.travelersSection}>
+          <div className={styles.travelersTitle}>Travelers</div>
+          <div className={styles.travelersList}>
+            {travelerNames.map((name) => {
+              const status = flight.bookingStatus?.[name] ?? 'Need to Book';
+              const isBooked = status === 'Booked';
+              return (
+                <div key={name} className={styles.travelerRow}>
+                  <span className={styles.travelerName}>{name}</span>
+                  <select
+                    className={`${styles.travelerSelect} ${isBooked ? styles.travelerBooked : styles.travelerNeedToBook}`}
+                    value={status}
+                    onChange={(e) => onUpdateBookingStatus?.(flight.id, name, e.target.value)}
+                  >
+                    <option value="Need to Book">Need to Book</option>
+                    <option value="Booked">Booked</option>
+                  </select>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <div className={styles.searchSection}>
         <div className={styles.searchTitle}>Search & Book</div>
         {links.map((link) => (

@@ -18,6 +18,7 @@ interface AddFlightFormProps {
   onOpenChange: (open: boolean) => void;
   onAdd: (partial: Partial<Flight>) => void;
   defaults?: Partial<Flight>;
+  buddyNames?: string[];
 }
 
 function makeInitial(defaults?: Partial<Flight>) {
@@ -34,12 +35,14 @@ function makeInitial(defaults?: Partial<Flight>) {
   };
 }
 
-export function AddFlightForm({ open, onOpenChange, onAdd, defaults }: AddFlightFormProps) {
+export function AddFlightForm({ open, onOpenChange, onAdd, defaults, buddyNames = [] }: AddFlightFormProps) {
   const [form, setForm] = useState(makeInitial(defaults));
-  const [prevDefaults, setPrevDefaults] = useState(defaults);
-  if (defaults !== prevDefaults) {
-    setPrevDefaults(defaults);
-    setForm(makeInitial(defaults));
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      setForm(makeInitial(defaults));
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -51,6 +54,11 @@ export function AddFlightForm({ open, onOpenChange, onAdd, defaults }: AddFlight
 
     const cost = form.cost === '' ? null : Number(form.cost);
     const costNum = cost !== null && !Number.isNaN(cost) ? cost : null;
+
+    const bookingStatus: Record<string, string> = {};
+    for (const name of buddyNames) {
+      bookingStatus[name] = 'Need to Book';
+    }
 
     onAdd({
       from,
@@ -64,6 +72,7 @@ export function AddFlightForm({ open, onOpenChange, onAdd, defaults }: AddFlight
       cost: costNum,
       status: 'Need to Book',
       seats: {},
+      bookingStatus,
     });
 
     setForm(makeInitial());

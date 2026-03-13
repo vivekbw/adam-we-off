@@ -144,7 +144,9 @@ export async function POST(req: NextRequest) {
 
     const links = bookingDeepLinks(originIata, destIata, date);
 
-    const offers: AmadeusFlightOffer[] = rawOffers.map((offer) => {
+    const offers: AmadeusFlightOffer[] = rawOffers
+      .filter((offer) => offer.itineraries[0]?.segments?.length > 0)
+      .map((offer) => {
       const itin = offer.itineraries[0];
       const firstSeg = itin.segments[0];
       const lastSeg = itin.segments[itin.segments.length - 1];

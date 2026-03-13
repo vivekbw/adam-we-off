@@ -8,6 +8,7 @@ const isSupabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 function toFlight(row: Record<string, unknown>): Flight {
   const r = row as Record<string, unknown>;
+  const bs = (r as { booking_status?: unknown }).booking_status ?? r.bookingStatus;
   return {
     id: String(r.id ?? ''),
     from: String(r.from ?? ''),
@@ -22,6 +23,7 @@ function toFlight(row: Record<string, unknown>): Flight {
     airline: String(r.airline ?? ''),
     status: String(r.status ?? ''),
     seats: (typeof r.seats === 'object' && r.seats !== null ? r.seats : {}) as Record<string, string>,
+    bookingStatus: (typeof bs === 'object' && bs !== null ? bs : {}) as Record<string, string>,
     cost: r.cost != null ? Number(r.cost) : null,
   };
 }
@@ -42,6 +44,7 @@ function flightToRow(f: Flight, tripId: string) {
     airline: f.airline,
     status: f.status,
     seats: f.seats,
+    booking_status: f.bookingStatus,
     cost: f.cost,
   };
 }
@@ -92,6 +95,7 @@ export function useFlights(tripId: string) {
       airline: partial.airline ?? '',
       status: partial.status ?? 'Need to Book',
       seats: partial.seats ?? {},
+      bookingStatus: partial.bookingStatus ?? {},
       cost: partial.cost ?? null,
     };
     const updated = [...flights, newFlight];

@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Plane, Plus, Search } from 'lucide-react';
 import type { Flight, ItinerarySegment } from '@/lib/constants';
+import { deriveFlightStatus } from '@/lib/constants';
 import { FlightCard } from './FlightCard';
 import { FlightDetail } from './FlightDetail';
 import { FlightGlobe } from './FlightGlobe';
@@ -16,7 +17,9 @@ export interface FlightsSectionProps {
   flights: Flight[];
   onAddFlight?: (partial: Partial<Flight>) => void;
   onDeleteFlight?: (id: string) => void;
+  onUpdateFlight?: (id: string, changes: Partial<Flight>) => void;
   itinerary?: ItinerarySegment[];
+  buddyNames?: string[];
 }
 
 interface SuggestedRoute {
@@ -70,9 +73,12 @@ export function FlightsSection({
   flights,
   onAddFlight,
   onDeleteFlight,
+  onUpdateFlight,
   itinerary = [],
+  buddyNames = [],
 }: FlightsSectionProps) {
-  const [selected, setSelected] = useState<Flight | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = selectedId ? flights.find((f) => f.id === selectedId) ?? null : null;
   const [showAdd, setShowAdd] = useState(false);
   const [addDefaults, setAddDefaults] = useState<Partial<Flight> | undefined>();
   const [activeRoute, setActiveRoute] = useState<SuggestedRoute | null>(null);
@@ -85,7 +91,7 @@ export function FlightsSection({
   );
 
   const handleCardClick = (flight: Flight) => {
-    setSelected((prev) => (prev?.id === flight.id ? null : flight));
+    setSelectedId((prev) => (prev === flight.id ? null : flight.id));
   };
 
   const handleSuggestClick = (route: SuggestedRoute) => {
@@ -115,11 +121,30 @@ export function FlightsSection({
           partial.fromFlag = activeRoute.fromFlag;
           partial.toFlag = activeRoute.toFlag;
         }
+        if (buddyNames.length > 0 && !partial.bookingStatus) {
+          const bs: Record<string, string> = {};
+          for (const name of buddyNames) bs[name] = 'Need to Book';
+          partial.bookingStatus = bs;
+        }
         onAddFlight(partial);
       }
       handleCloseSearch();
     },
-    [onAddFlight, activeRoute, handleCloseSearch]
+    [onAddFlight, activeRoute, handleCloseSearch, buddyNames]
+  );
+
+  const handleUpdateBookingStatus = useCallback(
+    (flightId: string, buddyName: string, newStatus: string) => {
+      if (!onUpdateFlight) return;
+      const flight = flights.find((f) => f.id === flightId);
+      if (!flight) return;
+      const newBookingStatus = { ...flight.bookingStatus, [buddyName]: newStatus };
+      onUpdateFlight(flightId, {
+        bookingStatus: newBookingStatus,
+        status: deriveFlightStatus(newBookingStatus, buddyNames),
+      });
+    },
+    [flights, onUpdateFlight, buddyNames]
   );
 
   return (
@@ -201,24 +226,36 @@ export function FlightsSection({
               isSelected={selected?.id === flight.id}
               onClick={() => handleCardClick(flight)}
               onDelete={onDeleteFlight}
+              buddyNames={buddyNames}
+              onUpdateBookingStatus={onUpdateFlight ? handleUpdateBookingStatus : undefined}
             />
           ))}
         </div>
 
         <aside className={styles.sidebar}>
-          {selected && <FlightDetail flight={selected} />}
+          {selected && (
+            <FlightDetail
+              flight={selected}
+              buddyNames={buddyNames}
+              onUpdateBookingStatus={onUpdateFlight ? handleUpdateBookingStatus : undefined}
+            />
+          )}
         </aside>
       </div>
 
       {onAddFlight && (
         <AddFlightForm
           open={showAdd}
-          onOpenChange={setShowAdd}
+          onOpenChange={(open) => {
+            setShowAdd(open);
+            if (!open) setAddDefaults(undefined);
+          }}
           onAdd={(partial) => {
             onAddFlight(partial);
             setShowAdd(false);
           }}
           defaults={addDefaults}
+          buddyNames={buddyNames}
         />
       )}
     </div>

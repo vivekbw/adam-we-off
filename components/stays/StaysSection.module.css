@@ -23,6 +23,9 @@
 }
 
 .coverage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
   margin-bottom: var(--space-6);
 }
 

@@ -27,12 +27,15 @@ export interface FlightCardProps {
   isSelected: boolean;
   onClick: () => void;
   onDelete?: (id: string) => void;
+  buddyNames?: string[];
+  onUpdateBookingStatus?: (flightId: string, buddyName: string, newStatus: string) => void;
 }
 
-export function FlightCard({ flight, isSelected, onClick, onDelete }: FlightCardProps) {
+export function FlightCard({ flight, isSelected, onClick, onDelete, buddyNames = [], onUpdateBookingStatus }: FlightCardProps) {
   const warning = FLIGHT_WARNINGS[flight.id];
   const statusClass =
-    flight.status === 'Booked' ? styles.tagGreen : styles.tagYellow;
+    flight.status === 'Booked' ? styles.tagGreen : styles.tagOrange;
+  const travelerNames = buddyNames.length > 0 ? buddyNames : Object.keys(flight.bookingStatus ?? {});
 
   return (
     <div
@@ -81,6 +84,30 @@ export function FlightCard({ flight, isSelected, onClick, onDelete }: FlightCard
           <span className={styles.cost}>~${flight.cost} CAD</span>
         )}
       </div>
+      {travelerNames.length > 0 && (
+        <div className={styles.travelersRow} onClick={(e) => e.stopPropagation()}>
+          {travelerNames.map((name) => {
+            const status = flight.bookingStatus?.[name] ?? 'Need to Book';
+            const isBooked = status === 'Booked';
+            return (
+              <label
+                key={name}
+                className={`${styles.travelerPill} ${isBooked ? styles.pillBooked : styles.pillNeedToBook}`}
+              >
+                <span className={styles.pillName}>{name}:</span>
+                <select
+                  className={styles.pillSelect}
+                  value={status}
+                  onChange={(e) => onUpdateBookingStatus?.(flight.id, name, e.target.value)}
+                >
+                  <option value="Need to Book">Need to Book</option>
+                  <option value="Booked">Booked</option>
+                </select>
+              </label>
+            );
+          })}
+        </div>
+      )}
       {Object.keys(flight.seats).length > 0 && (
         <div className={styles.seatsRow}>
           {Object.entries(flight.seats).map(([name, seat]) => (

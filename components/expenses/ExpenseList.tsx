@@ -34,12 +34,12 @@ export function ExpenseList({ expenses, buddyNames = [], onEdit, onDelete, onAdd
   const [addDesc, setAddDesc] = useState('');
   const [addAmount, setAddAmount] = useState('');
   const [addPaidBy, setAddPaidBy] = useState(BUDDY_NAMES[0] ?? '');
-  const [addSplit, setAddSplit] = useState<string[]>(BUDDY_NAMES);
+  const [addSplit, setAddSplit] = useState<string[]>([...BUDDY_NAMES]);
   const [addCategory, setAddCategory] = useState('Other');
 
   useEffect(() => {
     setAddPaidBy((prev) => (BUDDY_NAMES.includes(prev) ? prev : BUDDY_NAMES[0] ?? ''));
-    setAddSplit(BUDDY_NAMES);
+    setAddSplit([...BUDDY_NAMES]);
   }, [BUDDY_NAMES.join(',')]);
 
   const startEdit = (e: Expense) => {

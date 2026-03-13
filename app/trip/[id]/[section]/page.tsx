@@ -11,11 +11,13 @@ import { ActivitiesSection } from '@/components/activities/ActivitiesSection';
 import { NotesSection } from '@/components/notes/NotesSection';
 import { useItinerary } from '@/hooks/useTrip';
 import { useFlights } from '@/hooks/useFlights';
+import { deriveFlightStatus } from '@/lib/constants';
 import { useStays } from '@/hooks/useStays';
 import { useActivities } from '@/hooks/useActivities';
 import { useNotes } from '@/hooks/useNotes';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useBuddies } from '@/hooks/useBuddies';
+import { useExpenseBuddySync } from '@/hooks/useExpenseBuddySync';
 import { useTripDetail } from '@/hooks/useTrips';
 import styles from './page.module.css';
 
@@ -53,7 +55,7 @@ export default function SectionPage() {
   const tripName = trip?.name ?? 'Loading…';
 
   const { itinerary } = useItinerary(id);
-  const { flights, addFlight, deleteFlight } = useFlights(id);
+  const { flights, addFlight, updateFlight, deleteFlight, updateFlights } = useFlights(id);
   const { stays, updateStay, addStay, deleteStay } = useStays(id);
   const { activities, updateActivity, addActivity, deleteActivity } = useActivities(id);
   const { notes, addNote, editNote, deleteNote } = useNotes(id);
@@ -61,37 +63,38 @@ export default function SectionPage() {
   const { buddies } = useBuddies(id);
   const buddyNames = buddies.map((b) => b.name);
 
+  useExpenseBuddySync(buddies, expenses, updateExpenses);
+
   const [showBuddies, setShowBuddies] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
 
   const handleBuddyAdded = useCallback(
     (addedName: string) => {
-      if (expenses.length === 0) return;
-      const updated = expenses.map((e) => {
-        const isGroupExpense =
-          buddyNames.length === 0 || buddyNames.every((n) => e.split.includes(n));
-        if (isGroupExpense && !e.split.includes(addedName)) {
-          return { ...e, split: [...e.split, addedName] };
-        }
-        return e;
-      });
-      updateExpenses(updated);
+      if (flights.length > 0) {
+        const allNames = [...buddyNames, addedName];
+        const updatedFlights = flights.map((f) => {
+          if (f.bookingStatus?.[addedName]) return f;
+          const newBS = { ...f.bookingStatus, [addedName]: 'Need to Book' };
+          return { ...f, bookingStatus: newBS, status: deriveFlightStatus(newBS, allNames) };
+        });
+        updateFlights(updatedFlights);
+      }
     },
-    [buddyNames, expenses, updateExpenses]
+    [flights, updateFlights, buddyNames]
   );
 
   const handleBuddyRemoved = useCallback(
     (removedName: string) => {
-      if (expenses.length === 0) return;
-      const remaining = buddyNames.filter((n) => n !== removedName);
-      const updated = expenses.map((e) => ({
-        ...e,
-        split: e.split.filter((s) => s !== removedName),
-        paidBy: e.paidBy === removedName ? (remaining[0] ?? e.paidBy) : e.paidBy,
-      }));
-      updateExpenses(updated);
+      if (flights.length > 0) {
+        const remainingNames = buddyNames.filter((n) => n !== removedName);
+        const updatedFlights = flights.map((f) => {
+          const { [removedName]: _, ...rest } = f.bookingStatus ?? {};
+          return { ...f, bookingStatus: rest, status: deriveFlightStatus(rest, remainingNames) };
+        });
+        updateFlights(updatedFlights);
+      }
     },
-    [buddyNames, expenses, updateExpenses]
+    [flights, updateFlights, buddyNames]
   );
 
   if (!isValidSection(section)) {
@@ -136,7 +139,9 @@ export default function SectionPage() {
             flights={flights}
             onAddFlight={addFlight}
             onDeleteFlight={deleteFlight}
+            onUpdateFlight={updateFlight}
             itinerary={itinerary}
+            buddyNames={buddyNames}
           />
         );
       case 'stays':

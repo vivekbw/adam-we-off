@@ -46,22 +46,24 @@ function useLocalBuddies(tripId: string) {
 
   const addBuddy = useCallback(
     async (input: { name: string; email?: string; user_id?: string; role?: string; avatar?: string }) => {
-      const color = pickColor(buddies);
-      const avatar = input.avatar ?? input.name.charAt(0).toUpperCase();
-      const newBuddy: BuddyRow = {
-        id: localIdCounter++,
-        trip_id: tripId,
-        user_id: input.user_id ?? null,
-        name: input.name,
-        email: input.email ?? null,
-        avatar,
-        color,
-        role: input.role ?? 'editor',
-        status: input.email && !input.user_id ? 'invited' : 'active',
-      };
-      setBuddies((prev) => [...prev, newBuddy]);
+      setBuddies((prev) => {
+        const color = pickColor(prev);
+        const avatar = input.avatar ?? input.name.charAt(0).toUpperCase();
+        const newBuddy: BuddyRow = {
+          id: localIdCounter++,
+          trip_id: tripId,
+          user_id: input.user_id ?? null,
+          name: input.name,
+          email: input.email ?? null,
+          avatar,
+          color,
+          role: input.role ?? 'editor',
+          status: input.email && !input.user_id ? 'invited' : 'active',
+        };
+        return [...prev, newBuddy];
+      });
     },
-    [buddies, tripId]
+    [tripId]
   );
 
   const removeBuddy = useCallback(async (buddyId: number) => {

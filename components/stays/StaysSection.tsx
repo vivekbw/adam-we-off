@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { Search, Plus, Building2 } from 'lucide-react';
 import { daysBetween, type Stay, type ItinerarySegment } from '@/lib/constants';
 import { StayCoverage } from './StayCoverage';
+import { StayCoverageStrip } from './StayCoverageStrip';
 import { StayCard } from './StayCard';
 import { AddStayForm } from './AddStayForm';
 import { StaySearchResults } from './StaySearchResults';
@@ -175,6 +176,7 @@ export function StaysSection({
       </header>
 
       <div className={styles.coverage}>
+        <StayCoverageStrip itinerary={itinerary} stays={stays} />
         <StayCoverage stays={stays} onSegmentClick={handleSegmentClick} />
       </div>
 
@@ -301,7 +303,7 @@ export function StaysSection({
                   paidBy: partial.bookedBy,
                   split: buddyNames,
                   date: partial.checkIn ?? new Date().toISOString().slice(0, 10),
-                  category: 'Accommodation',
+                  category: 'Stay',
                 });
               }
             }

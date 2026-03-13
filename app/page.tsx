@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { toast } from 'sonner';
 import { TopBar } from '@/components/layout/TopBar';
 import { useTrips, deleteTrip, type TripRow } from '@/hooks/useTrips';
@@ -152,8 +152,9 @@ function TripCard({ trip, index, onDeleted }: { trip: TripRow; index: number; on
 }
 
 export default function HomePage() {
-  const { trips, isLoading, mutate } = useTrips();
+  const { trips, isLoading, error, mutate } = useTrips();
   const [showNewTrip, setShowNewTrip] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   return (
     <div className={styles.page}>
@@ -172,12 +173,20 @@ export default function HomePage() {
             </>
           )}
 
-          {!isLoading &&
-            trips.map((trip, i) => (
-              <TripCard key={trip.id} trip={trip} index={i} onDeleted={() => mutate()} />
-            ))}
+          {error && (
+            <div className={styles.empty} data-state="error">
+              <p>Couldn&apos;t load trips. Check your connection and try again.</p>
+              <button type="button" onClick={() => mutate()} className={styles.retryBtn}>
+                Retry
+              </button>
+            </div>
+          )}
 
-          {!isLoading && trips.length === 0 && (
+          {!isLoading && !error && trips.map((trip, i) => (
+            <TripCard key={trip.id} trip={trip} index={i} onDeleted={() => mutate()} />
+          ))}
+
+          {!isLoading && !error && trips.length === 0 && (
             <div className={styles.empty}>
               <p>No trips yet. Create your first one!</p>
             </div>
@@ -185,7 +194,7 @@ export default function HomePage() {
 
           <motion.article
             className={styles.newTripCard}
-            initial={{ opacity: 0, y: 16 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
               duration: 0.35,
