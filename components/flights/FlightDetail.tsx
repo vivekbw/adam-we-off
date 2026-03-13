@@ -7,6 +7,7 @@ import styles from './FlightDetail.module.css';
 export interface FlightDetailProps {
   flight: Flight;
   buddyNames?: string[];
+  onUpdateBookingStatus?: (flightId: string, buddyName: string, newStatus: string) => void;
 }
 
 const ROWS: Array<[string, (f: Flight) => string]> = [
@@ -16,7 +17,7 @@ const ROWS: Array<[string, (f: Flight) => string]> = [
   ['Airline', (f) => f.airline],
 ];
 
-export function FlightDetail({ flight, buddyNames = [] }: FlightDetailProps) {
+export function FlightDetail({ flight, buddyNames = [], onUpdateBookingStatus }: FlightDetailProps) {
   const links = flightSearchLinks(flight.fromCode, flight.toCode, flight.date);
   const statusClass =
     flight.status === 'Booked' ? styles.tagGreen : styles.tagOrange;
@@ -56,9 +57,14 @@ export function FlightDetail({ flight, buddyNames = [] }: FlightDetailProps) {
               return (
                 <div key={name} className={styles.travelerRow}>
                   <span className={styles.travelerName}>{name}</span>
-                  <span className={`${styles.travelerStatus} ${isBooked ? styles.travelerBooked : styles.travelerNeedToBook}`}>
-                    {status}
-                  </span>
+                  <select
+                    className={`${styles.travelerSelect} ${isBooked ? styles.travelerBooked : styles.travelerNeedToBook}`}
+                    value={status}
+                    onChange={(e) => onUpdateBookingStatus?.(flight.id, name, e.target.value)}
+                  >
+                    <option value="Need to Book">Need to Book</option>
+                    <option value="Booked">Booked</option>
+                  </select>
                 </div>
               );
             })}

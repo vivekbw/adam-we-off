@@ -37,10 +37,12 @@ function makeInitial(defaults?: Partial<Flight>) {
 
 export function AddFlightForm({ open, onOpenChange, onAdd, defaults, buddyNames = [] }: AddFlightFormProps) {
   const [form, setForm] = useState(makeInitial(defaults));
-  const [prevDefaults, setPrevDefaults] = useState(defaults);
-  if (defaults !== prevDefaults) {
-    setPrevDefaults(defaults);
-    setForm(makeInitial(defaults));
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      setForm(makeInitial(defaults));
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {

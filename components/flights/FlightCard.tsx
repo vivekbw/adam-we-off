@@ -28,10 +28,10 @@ export interface FlightCardProps {
   onClick: () => void;
   onDelete?: (id: string) => void;
   buddyNames?: string[];
-  onToggleBookingStatus?: (flightId: string, buddyName: string) => void;
+  onUpdateBookingStatus?: (flightId: string, buddyName: string, newStatus: string) => void;
 }
 
-export function FlightCard({ flight, isSelected, onClick, onDelete, buddyNames = [], onToggleBookingStatus }: FlightCardProps) {
+export function FlightCard({ flight, isSelected, onClick, onDelete, buddyNames = [], onUpdateBookingStatus }: FlightCardProps) {
   const warning = FLIGHT_WARNINGS[flight.id];
   const statusClass =
     flight.status === 'Booked' ? styles.tagGreen : styles.tagOrange;
@@ -90,15 +90,20 @@ export function FlightCard({ flight, isSelected, onClick, onDelete, buddyNames =
             const status = flight.bookingStatus?.[name] ?? 'Need to Book';
             const isBooked = status === 'Booked';
             return (
-              <button
+              <label
                 key={name}
-                type="button"
                 className={`${styles.travelerPill} ${isBooked ? styles.pillBooked : styles.pillNeedToBook}`}
-                onClick={() => onToggleBookingStatus?.(flight.id, name)}
-                title={`${name}: ${status} — click to toggle`}
               >
-                {name}
-              </button>
+                <span className={styles.pillName}>{name}:</span>
+                <select
+                  className={styles.pillSelect}
+                  value={status}
+                  onChange={(e) => onUpdateBookingStatus?.(flight.id, name, e.target.value)}
+                >
+                  <option value="Need to Book">Need to Book</option>
+                  <option value="Booked">Booked</option>
+                </select>
+              </label>
             );
           })}
         </div>

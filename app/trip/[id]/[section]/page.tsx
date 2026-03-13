@@ -71,28 +71,30 @@ export default function SectionPage() {
   const handleBuddyAdded = useCallback(
     (addedName: string) => {
       if (flights.length > 0) {
+        const allNames = [...buddyNames, addedName];
         const updatedFlights = flights.map((f) => {
           if (f.bookingStatus?.[addedName]) return f;
           const newBS = { ...f.bookingStatus, [addedName]: 'Need to Book' };
-          return { ...f, bookingStatus: newBS, status: deriveFlightStatus(newBS) };
+          return { ...f, bookingStatus: newBS, status: deriveFlightStatus(newBS, allNames) };
         });
         updateFlights(updatedFlights);
       }
     },
-    [flights, updateFlights]
+    [flights, updateFlights, buddyNames]
   );
 
   const handleBuddyRemoved = useCallback(
     (removedName: string) => {
       if (flights.length > 0) {
+        const remainingNames = buddyNames.filter((n) => n !== removedName);
         const updatedFlights = flights.map((f) => {
           const { [removedName]: _, ...rest } = f.bookingStatus ?? {};
-          return { ...f, bookingStatus: rest, status: deriveFlightStatus(rest) };
+          return { ...f, bookingStatus: rest, status: deriveFlightStatus(rest, remainingNames) };
         });
         updateFlights(updatedFlights);
       }
     },
-    [flights, updateFlights]
+    [flights, updateFlights, buddyNames]
   );
 
   if (!isValidSection(section)) {

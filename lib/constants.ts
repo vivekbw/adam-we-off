@@ -82,10 +82,17 @@ export interface Flight {
   cost: number | null;
 }
 
-export function deriveFlightStatus(bookingStatus: Record<string, string>): string {
-  const entries = Object.values(bookingStatus);
-  if (entries.length === 0) return 'Need to Book';
-  return entries.every((s) => s === 'Booked') ? 'Booked' : 'Need to Book';
+export function deriveFlightStatus(
+  bookingStatus: Record<string, string>,
+  buddyNames?: string[]
+): string {
+  const names = buddyNames && buddyNames.length > 0
+    ? buddyNames
+    : Object.keys(bookingStatus);
+  if (names.length === 0) return 'Need to Book';
+  return names.every((name) => bookingStatus[name] === 'Booked')
+    ? 'Booked'
+    : 'Need to Book';
 }
 
 export interface Stay {
@@ -164,9 +171,9 @@ export const SEED_FLIGHTS: Flight[] = [
     dep: "10:00am",
     arr: "4:25pm+1",
     airline: "Air Canada",
-    status: "Booked",
-    seats: { Adam: "—", Kate: "—", Vienna: "—", You: "—" },
-    bookingStatus: { Adam: "Booked", Kate: "Booked", Vienna: "Booked", You: "Booked" },
+    status: "Need to Book",
+    seats: {},
+    bookingStatus: {},
     cost: 770,
   },
   {
@@ -181,9 +188,9 @@ export const SEED_FLIGHTS: Flight[] = [
     dep: "10:45am",
     arr: "6:40pm",
     airline: "Vietnam Airlines",
-    status: "Booked",
+    status: "Need to Book",
     seats: {},
-    bookingStatus: { Adam: "Booked", Kate: "Booked", Vienna: "Booked", You: "Booked" },
+    bookingStatus: {},
     cost: 450,
   },
   {
@@ -198,9 +205,9 @@ export const SEED_FLIGHTS: Flight[] = [
     dep: "10:35am",
     arr: "2:50pm",
     airline: "Thai AirAsia",
-    status: "Booked",
+    status: "Need to Book",
     seats: {},
-    bookingStatus: { Adam: "Booked", Kate: "Booked", Vienna: "Booked", You: "Booked" },
+    bookingStatus: {},
     cost: 100,
   },
   {
@@ -215,9 +222,9 @@ export const SEED_FLIGHTS: Flight[] = [
     dep: "9:10pm",
     arr: "10:30pm",
     airline: "Thai AirAsia",
-    status: "Booked",
-    seats: { Adam: "44H", Kate: "44J" },
-    bookingStatus: { Adam: "Booked", Kate: "Booked", Vienna: "Booked", You: "Booked" },
+    status: "Need to Book",
+    seats: {},
+    bookingStatus: {},
     cost: 80,
   },
   {
@@ -232,9 +239,9 @@ export const SEED_FLIGHTS: Flight[] = [
     dep: "12:40pm",
     arr: "6:00pm",
     airline: "AirAsia",
-    status: "Booked",
+    status: "Need to Book",
     seats: {},
-    bookingStatus: { Adam: "Booked", Kate: "Booked", Vienna: "Booked", You: "Booked" },
+    bookingStatus: {},
     cost: 140,
   },
   {
@@ -251,7 +258,7 @@ export const SEED_FLIGHTS: Flight[] = [
     airline: "Connecting",
     status: "Need to Book",
     seats: {},
-    bookingStatus: { Adam: "Need to Book", Kate: "Need to Book", Vienna: "Need to Book", You: "Need to Book" },
+    bookingStatus: {},
     cost: null,
   },
 ];

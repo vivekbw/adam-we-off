@@ -52,7 +52,9 @@ export function useExpenseBuddySync(
 
     const updated = currentExpenses.map((e) => {
       const wasGroupExpense =
-        prevNames.length > 0 && prevNames.every((n) => e.split.includes(n));
+        prevNames.length > 0 &&
+        e.split.length === prevNames.length &&
+        prevNames.every((n) => e.split.includes(n));
 
       let newSplit: string[];
       if (wasGroupExpense) {

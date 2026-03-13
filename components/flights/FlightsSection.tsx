@@ -77,7 +77,8 @@ export function FlightsSection({
   itinerary = [],
   buddyNames = [],
 }: FlightsSectionProps) {
-  const [selected, setSelected] = useState<Flight | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = selectedId ? flights.find((f) => f.id === selectedId) ?? null : null;
   const [showAdd, setShowAdd] = useState(false);
   const [addDefaults, setAddDefaults] = useState<Partial<Flight> | undefined>();
   const [activeRoute, setActiveRoute] = useState<SuggestedRoute | null>(null);
@@ -90,7 +91,7 @@ export function FlightsSection({
   );
 
   const handleCardClick = (flight: Flight) => {
-    setSelected((prev) => (prev?.id === flight.id ? null : flight));
+    setSelectedId((prev) => (prev === flight.id ? null : flight.id));
   };
 
   const handleSuggestClick = (route: SuggestedRoute) => {
@@ -132,20 +133,18 @@ export function FlightsSection({
     [onAddFlight, activeRoute, handleCloseSearch, buddyNames]
   );
 
-  const handleToggleBookingStatus = useCallback(
-    (flightId: string, buddyName: string) => {
+  const handleUpdateBookingStatus = useCallback(
+    (flightId: string, buddyName: string, newStatus: string) => {
       if (!onUpdateFlight) return;
       const flight = flights.find((f) => f.id === flightId);
       if (!flight) return;
-      const current = flight.bookingStatus?.[buddyName] ?? 'Need to Book';
-      const next = current === 'Booked' ? 'Need to Book' : 'Booked';
-      const newBookingStatus = { ...flight.bookingStatus, [buddyName]: next };
+      const newBookingStatus = { ...flight.bookingStatus, [buddyName]: newStatus };
       onUpdateFlight(flightId, {
         bookingStatus: newBookingStatus,
-        status: deriveFlightStatus(newBookingStatus),
+        status: deriveFlightStatus(newBookingStatus, buddyNames),
       });
     },
-    [flights, onUpdateFlight]
+    [flights, onUpdateFlight, buddyNames]
   );
 
   return (
@@ -228,20 +227,29 @@ export function FlightsSection({
               onClick={() => handleCardClick(flight)}
               onDelete={onDeleteFlight}
               buddyNames={buddyNames}
-              onToggleBookingStatus={onUpdateFlight ? handleToggleBookingStatus : undefined}
+              onUpdateBookingStatus={onUpdateFlight ? handleUpdateBookingStatus : undefined}
             />
           ))}
         </div>
 
         <aside className={styles.sidebar}>
-          {selected && <FlightDetail flight={selected} buddyNames={buddyNames} />}
+          {selected && (
+            <FlightDetail
+              flight={selected}
+              buddyNames={buddyNames}
+              onUpdateBookingStatus={onUpdateFlight ? handleUpdateBookingStatus : undefined}
+            />
+          )}
         </aside>
       </div>
 
       {onAddFlight && (
         <AddFlightForm
           open={showAdd}
-          onOpenChange={setShowAdd}
+          onOpenChange={(open) => {
+            setShowAdd(open);
+            if (!open) setAddDefaults(undefined);
+          }}
           onAdd={(partial) => {
             onAddFlight(partial);
             setShowAdd(false);

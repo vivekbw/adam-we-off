@@ -133,20 +133,37 @@
 .travelerPill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  gap: 2px;
+  padding: 3px 4px 3px 10px;
   font-size: 0.625rem;
   font-weight: 700;
   border-radius: var(--radius-full);
   border: 1px solid transparent;
-  cursor: pointer;
-  transition: all var(--transition-fast);
   white-space: nowrap;
   user-select: none;
+  cursor: default;
+  transition: all var(--transition-fast);
 }
 
-.travelerPill:hover {
-  transform: scale(1.05);
+.pillName {
+  pointer-events: none;
+}
+
+.pillSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 14px 0 2px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  background-size: 8px;
 }
 
 .pillBooked {
@@ -155,20 +172,10 @@
   border-color: rgba(16, 185, 129, 0.2);
 }
 
-.pillBooked:hover {
-  background-color: var(--color-tag-green);
-  color: white;
-}
-
 .pillNeedToBook {
   background-color: var(--color-tag-orange-bg);
   color: var(--color-tag-orange);
   border-color: rgba(249, 115, 22, 0.2);
-}
-
-.pillNeedToBook:hover {
-  background-color: var(--color-tag-orange);
-  color: white;
 }
 
 .warningRow {
