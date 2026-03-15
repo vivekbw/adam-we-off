@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { ItinerarySegment } from '@/lib/constants';
-import { CITY_IMAGES, fmtDate } from '@/lib/constants';
+import { CITY_IMAGES, fmtDate, daysBetween } from '@/lib/constants';
 import styles from './TimelineStrip.module.css';
 
 const photoCache = new Map<string, string>();
@@ -91,7 +91,9 @@ function SegmentCard({
       <div className={styles.content}>
         <div className={styles.flag}>{seg.flag}</div>
         <div className={styles.cityName}>{seg.city}</div>
-        <div className={styles.date}>{fmtDate(seg.startDate)}</div>
+        <div className={styles.date}>
+          {fmtDate(seg.startDate)} → {fmtDate(seg.endDate)}
+        </div>
         <div className={styles.nights}>{seg.nights}n</div>
       </div>
     </motion.div>
@@ -100,15 +102,50 @@ function SegmentCard({
 
 export interface TimelineStripProps {
   itinerary: ItinerarySegment[];
+  tripStartDate?: string | null;
+  tripEndDate?: string | null;
 }
 
-export function TimelineStrip({ itinerary }: TimelineStripProps) {
-  const totalNights = itinerary.reduce((sum, seg) => sum + seg.nights, 0);
+function GapCard({
+  basePct,
+  gapDays,
+  index,
+}: {
+  basePct: number;
+  gapDays: number;
+  index: number;
+}) {
+  return (
+    <motion.div
+      className={styles.gapCard}
+      style={{ flexBasis: `${basePct}%` }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+    >
+      <div className={styles.gapContent}>
+        <div className={styles.gapTitle}>Need to Add</div>
+        <div className={styles.gapDays}>{gapDays}d</div>
+      </div>
+    </motion.div>
+  );
+}
+
+export function TimelineStrip({
+  itinerary,
+  tripStartDate,
+  tripEndDate,
+}: TimelineStripProps) {
+  const itineraryDays = itinerary.reduce((sum, seg) => sum + seg.nights, 0);
+  const tripDays =
+    tripStartDate && tripEndDate ? Math.max(daysBetween(tripStartDate, tripEndDate), 0) : itineraryDays;
+  const extraDays = Math.max(tripDays - itineraryDays, 0);
+  const totalDays = tripDays > 0 ? tripDays : itineraryDays;
 
   return (
     <div className={styles.strip}>
       {itinerary.map((seg, i) => {
-        const basePct = Math.max((seg.nights / totalNights) * 100, 8);
+        const basePct = totalDays > 0 ? (seg.nights / totalDays) * 100 : 0;
         return (
           <SegmentCard
             key={seg.id}
@@ -118,6 +155,13 @@ export function TimelineStrip({ itinerary }: TimelineStripProps) {
           />
         );
       })}
+      {extraDays > 0 && (
+        <GapCard
+          gapDays={extraDays}
+          index={itinerary.length}
+          basePct={totalDays > 0 ? (extraDays / totalDays) * 100 : 0}
+        />
+      )}
     </div>
   );
 }

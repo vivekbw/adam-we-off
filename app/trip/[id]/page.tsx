@@ -19,7 +19,6 @@ import { useNotes } from '@/hooks/useNotes';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useBuddies } from '@/hooks/useBuddies';
 import { useTripDetail, updateTrip } from '@/hooks/useTrips';
-import { fmtDate, daysBetween } from '@/lib/constants';
 import styles from './page.module.css';
 
 const SplitModal = dynamic(
@@ -93,93 +92,9 @@ function EditableTripName({ tripId, name }: { tripId: string; name: string }) {
   );
 }
 
-function EditableDates({ tripId, startDate, endDate, totalDays }: { tripId: string; startDate: string | null; endDate: string | null; totalDays: number }) {
-  const [editingStart, setEditingStart] = useState(false);
-  const [editingEnd, setEditingEnd] = useState(false);
-  const [start, setStart] = useState(startDate ?? '');
-  const [end, setEnd] = useState(endDate ?? '');
-
-  useEffect(() => {
-    setStart(startDate ?? '');
-  }, [startDate]);
-
-  useEffect(() => {
-    setEnd(endDate ?? '');
-  }, [endDate]);
-
-  async function saveStart() {
-    setEditingStart(false);
-    if (start !== (startDate ?? '')) {
-      const ok = await updateTrip(tripId, { start_date: start || null });
-      if (!ok) {
-        toast.error('Failed to update start date');
-        setStart(startDate ?? '');
-      }
-    }
-  }
-
-  async function saveEnd() {
-    setEditingEnd(false);
-    if (end !== (endDate ?? '')) {
-      const ok = await updateTrip(tripId, { end_date: end || null });
-      if (!ok) {
-        toast.error('Failed to update end date');
-        setEnd(endDate ?? '');
-      }
-    }
-  }
-
-  return (
-    <div className={styles.datesRow}>
-      {editingStart ? (
-        <Input
-          type="date"
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
-          onBlur={saveStart}
-          onKeyDown={(e) => e.key === 'Enter' && saveStart()}
-          className="w-40"
-          autoFocus
-        />
-      ) : (
-        <span
-          onClick={() => setEditingStart(true)}
-          className={styles.editableDate}
-          title="Click to edit start date"
-        >
-          {start ? fmtDate(start) : 'Set start date'}
-        </span>
-      )}
-      <span className={styles.dateSep}>–</span>
-      {editingEnd ? (
-        <Input
-          type="date"
-          value={end}
-          onChange={(e) => setEnd(e.target.value)}
-          onBlur={saveEnd}
-          onKeyDown={(e) => e.key === 'Enter' && saveEnd()}
-          className="w-40"
-          autoFocus
-        />
-      ) : (
-        <span
-          onClick={() => setEditingEnd(true)}
-          className={styles.editableDate}
-          title="Click to edit end date"
-        >
-          {end ? fmtDate(end) : 'Set end date'}
-        </span>
-      )}
-      {start && end && daysBetween(start, end) > 0 && (
-        <span className={styles.duration}>· {daysBetween(start, end)} days</span>
-      )}
-    </div>
-  );
-}
-
 export default function TripPage() {
   const { id } = useParams() as { id: string };
-  const { trip, mutate: mutateTripDetail } = useTripDetail(id);
+  const { trip } = useTripDetail(id);
   const tripName = trip?.name ?? 'Loading…';
 
   const { itinerary, updateItinerary, addSegment, removeSegment } = useItinerary(id);
@@ -193,14 +108,27 @@ export default function TripPage() {
   const [showBuddies, setShowBuddies] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
 
-  const totalDays =
-    itinerary.length > 0
-      ? daysBetween(itinerary[0].startDate, itinerary[itinerary.length - 1].endDate)
-      : 20;
-
   const bookedFlights = flights.filter((f) => f.status === 'Booked').length;
   const bookedStays = stays.filter((s) => s.status === 'Booked').length;
   const bookedActivities = activities.filter((a) => a.status === 'Booked').length;
+
+  async function handlePlannerSave(
+    updatedItinerary: typeof itinerary,
+    tripDates: { startDate: string; endDate: string },
+  ) {
+    await updateItinerary(updatedItinerary);
+
+    if (!trip) return;
+
+    const ok = await updateTrip(id, {
+      start_date: tripDates.startDate,
+      end_date: tripDates.endDate,
+    });
+
+    if (!ok) {
+      throw new Error('Failed to update trip date bounds');
+    }
+  }
 
   const sections = [
     {
@@ -252,17 +180,13 @@ export default function TripPage() {
       <main className={styles.main}>
         <div className={styles.hero}>
           <EditableTripName tripId={id} name={tripName} />
-          {trip && (
-            <EditableDates
-              tripId={id}
-              startDate={trip.start_date}
-              endDate={trip.end_date}
-              totalDays={totalDays}
-            />
-          )}
         </div>
 
-        <TimelineStrip itinerary={itinerary} />
+        <TimelineStrip
+          itinerary={itinerary}
+          tripStartDate={trip?.start_date}
+          tripEndDate={trip?.end_date}
+        />
 
         <div className={styles.grid}>
           <div className={styles.left}>
@@ -289,7 +213,9 @@ export default function TripPage() {
           <div className={styles.right}>
             <TripPlanner
               itinerary={itinerary}
-              onSave={updateItinerary}
+              tripStartDate={trip?.start_date}
+              tripEndDate={trip?.end_date}
+              onSave={handlePlannerSave}
               onAddSegment={addSegment}
               onRemoveSegment={removeSegment}
               buddies={buddies}
