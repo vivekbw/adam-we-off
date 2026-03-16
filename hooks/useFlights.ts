@@ -46,6 +46,25 @@ function flightToRow(f: Flight, tripId: string) {
   };
 }
 
+function sameImportedFlight(a: Partial<Flight>, b: Flight) {
+  if (a.fromCode && a.toCode && b.fromCode && b.toCode) {
+    return a.fromCode === b.fromCode && a.toCode === b.toCode;
+  }
+
+  return (
+    (a.from ?? '').toLowerCase() === b.from.toLowerCase() &&
+    (a.to ?? '').toLowerCase() === b.to.toLowerCase()
+  );
+}
+
+function sortFlights(list: Flight[]) {
+  return [...list].sort((a, b) => {
+    const left = new Date(`${a.date || '9999-12-31'}T00:00:00`).getTime();
+    const right = new Date(`${b.date || '9999-12-31'}T00:00:00`).getTime();
+    return left - right;
+  });
+}
+
 async function fetchFlights(tripId: string): Promise<Flight[]> {
   if (!isSupabaseConfigured || !supabase) return SEED_FLIGHTS;
   const { data, error } = await supabase
@@ -94,7 +113,7 @@ export function useFlights(tripId: string) {
       seats: partial.seats ?? {},
       cost: partial.cost ?? null,
     };
-    const updated = [...flights, newFlight];
+    const updated = sortFlights([...flights, newFlight]);
     mutate(updated, false);
     if (isSupabaseConfigured && supabase) {
       await supabase.from('flights').insert(flightToRow(newFlight, tripId));
@@ -102,8 +121,56 @@ export function useFlights(tripId: string) {
     }
   };
 
+  const importFlights = async (partials: Partial<Flight>[]) => {
+    let updated = [...flights];
+    const imported: Flight[] = [];
+
+    for (let index = 0; index < partials.length; index += 1) {
+      const partial = partials[index];
+      const existingIndex = updated.findIndex((flight) => sameImportedFlight(partial, flight));
+      const existing = existingIndex >= 0 ? updated[existingIndex] : null;
+
+      const merged: Flight = {
+        id: existing?.id ?? `fl-${Date.now()}-${index}`,
+        from: partial.from ?? existing?.from ?? '',
+        fromCode: partial.fromCode ?? existing?.fromCode ?? '',
+        to: partial.to ?? existing?.to ?? '',
+        toCode: partial.toCode ?? existing?.toCode ?? '',
+        fromFlag: partial.fromFlag ?? existing?.fromFlag ?? '',
+        toFlag: partial.toFlag ?? existing?.toFlag ?? '',
+        date: partial.date ?? existing?.date ?? '',
+        dep: partial.dep ?? existing?.dep ?? '',
+        arr: partial.arr ?? existing?.arr ?? '',
+        airline: partial.airline ?? existing?.airline ?? '',
+        status: partial.status ?? existing?.status ?? 'Booked',
+        seats: partial.seats ?? existing?.seats ?? {},
+        cost: partial.cost ?? existing?.cost ?? null,
+      };
+
+      if (existingIndex >= 0) {
+        updated[existingIndex] = merged;
+      } else {
+        updated.push(merged);
+      }
+
+      imported.push(merged);
+    }
+
+    updated = sortFlights(updated);
+
+    mutate(updated, false);
+    if (isSupabaseConfigured && supabase) {
+      for (const flight of imported) {
+        await supabase.from('flights').upsert(flightToRow(flight, tripId));
+      }
+      mutate();
+    }
+
+    return imported;
+  };
+
   const updateFlight = async (id: string, changes: Partial<Flight>) => {
-    const updated = flights.map((f) => (f.id === id ? { ...f, ...changes } : f));
+    const updated = sortFlights(flights.map((f) => (f.id === id ? { ...f, ...changes } : f)));
     mutate(updated, false);
     if (isSupabaseConfigured && supabase) {
       const flight = updated.find((f) => f.id === id);
@@ -123,5 +190,5 @@ export function useFlights(tripId: string) {
     }
   };
 
-  return { flights, isLoading, error, updateFlights, addFlight, updateFlight, deleteFlight };
+  return { flights, isLoading, error, updateFlights, addFlight, updateFlight, deleteFlight, importFlights };
 }

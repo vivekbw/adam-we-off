@@ -43,7 +43,7 @@ export default function SectionPage() {
   const tripName = trip?.name ?? 'Loading…';
 
   const { itinerary } = useItinerary(id);
-  const { flights, addFlight, deleteFlight } = useFlights(id);
+  const { flights, addFlight, updateFlight, deleteFlight, importFlights } = useFlights(id);
   const { stays, updateStay, addStay, deleteStay } = useStays(id);
   const { activities, updateActivity, addActivity, deleteActivity } = useActivities(id);
   const { notes, addNote, editNote, deleteNote } = useNotes(id);
@@ -77,6 +77,8 @@ export default function SectionPage() {
           <FlightsSection
             flights={flights}
             onAddFlight={addFlight}
+            onUpdateFlight={updateFlight}
+            onImportFlights={importFlights}
             onDeleteFlight={deleteFlight}
             itinerary={itinerary}
           />

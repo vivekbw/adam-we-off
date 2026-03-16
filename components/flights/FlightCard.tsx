@@ -2,6 +2,7 @@
 
 import type { Flight } from '@/lib/constants';
 import { fmtDate } from '@/lib/constants';
+import { getAllFlightWarnings } from '@/lib/flights/insights';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -16,21 +17,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import styles from './FlightCard.module.css';
 
-const FLIGHT_WARNINGS: Record<string, string> = {
-  f5: 'BKK is large — allow 2h before departure. ~1h taxi from Khaosan area.',
-  f6: 'DPS return: bus from Uluwatu ~1.5h. Book transport early!',
-  f2: 'NRT→HAN 10:45am. Tour pickup 7am May 30 — tight!',
-};
-
 export interface FlightCardProps {
   flight: Flight;
+  warnings?: string[];
   isSelected: boolean;
   onClick: () => void;
   onDelete?: (id: string) => void;
 }
 
-export function FlightCard({ flight, isSelected, onClick, onDelete }: FlightCardProps) {
-  const warning = FLIGHT_WARNINGS[flight.id];
+export function FlightCard({ flight, warnings = [], isSelected, onClick, onDelete }: FlightCardProps) {
+  const mergedWarnings = getAllFlightWarnings(flight, warnings);
   const statusClass =
     flight.status === 'Booked' ? styles.tagGreen : styles.tagYellow;
 
@@ -90,9 +86,9 @@ export function FlightCard({ flight, isSelected, onClick, onDelete }: FlightCard
           ))}
         </div>
       )}
-      {warning && (
-        <div className={styles.warningRow}>⚠️ {warning}</div>
-      )}
+      {mergedWarnings.map((warning) => (
+        <div key={warning} className={styles.warningRow}>⚠️ {warning}</div>
+      ))}
       {onDelete && (
         <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
           <AlertDialog>

@@ -2,10 +2,14 @@
 
 import type { Flight } from '@/lib/constants';
 import { fmtDate, fmtDateLong, flightSearchLinks } from '@/lib/constants';
+import { generateBookedFlightBlurb, getFlightWarningExplanation } from '@/lib/flights/insights';
+import { Button } from '@/components/ui/button';
 import styles from './FlightDetail.module.css';
 
 export interface FlightDetailProps {
   flight: Flight;
+  warnings?: string[];
+  onEdit?: (flight: Flight) => void;
 }
 
 const ROWS: Array<[string, (f: Flight) => string]> = [
@@ -15,10 +19,13 @@ const ROWS: Array<[string, (f: Flight) => string]> = [
   ['Airline', (f) => f.airline],
 ];
 
-export function FlightDetail({ flight }: FlightDetailProps) {
+export function FlightDetail({ flight, warnings = [], onEdit }: FlightDetailProps) {
   const links = flightSearchLinks(flight.fromCode, flight.toCode, flight.date);
   const statusClass =
     flight.status === 'Booked' ? styles.tagGreen : styles.tagYellow;
+  const isBooked = flight.status === 'Booked';
+  const showTravelNote = isBooked && warnings.length === 0;
+  const showWarnings = warnings.length > 0;
 
   return (
     <div className={styles.card}>
@@ -31,9 +38,16 @@ export function FlightDetail({ flight }: FlightDetailProps) {
           </div>
           <span className={styles.flag}>{flight.toFlag}</span>
         </div>
-        <span className={`${styles.statusTag} ${statusClass}`}>
-          {flight.status}
-        </span>
+        <div className={styles.headerActions}>
+          <span className={`${styles.statusTag} ${statusClass}`}>
+            {flight.status}
+          </span>
+          {onEdit && (
+            <Button type="button" variant="outline" size="sm" onClick={() => onEdit(flight)}>
+              Edit
+            </Button>
+          )}
+        </div>
       </div>
       <h3 className={styles.title}>
         {flight.from} → {flight.to}
@@ -44,23 +58,44 @@ export function FlightDetail({ flight }: FlightDetailProps) {
           <span className={styles.rowValue}>{getValue(flight)}</span>
         </div>
       ))}
-      <div className={styles.searchSection}>
-        <div className={styles.searchTitle}>Search & Book</div>
-        {links.map((link) => (
-          <a
-            key={link.name}
-            href={link.url}
-            target="_blank"
-            rel="noreferrer"
-            className={styles.searchLink}
-          >
-            <span>🔗 {link.name}</span>
-            <span className={styles.searchLinkMeta}>
-              Filter by {fmtDate(flight.date)} →
-            </span>
-          </a>
-        ))}
-      </div>
+      {showWarnings && (
+        <div className={styles.warningSection}>
+          <div className={styles.warningTitle}>Flag Details</div>
+          {warnings.map((warning) => (
+            <div key={warning} className={styles.warningItem}>
+              <div className={styles.warningSummary}>⚠️ {warning}</div>
+              <div className={styles.warningExplain}>{getFlightWarningExplanation(warning)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {showTravelNote && (
+        <div className={styles.noteSection}>
+          <div className={styles.noteTitle}>Travel Note</div>
+          <div className={styles.noteBody}>
+            {generateBookedFlightBlurb(flight)}
+          </div>
+        </div>
+      )}
+      {!isBooked && (
+        <div className={styles.searchSection}>
+          <div className={styles.searchTitle}>Search & Book</div>
+          {links.map((link) => (
+            <a
+              key={link.name}
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.searchLink}
+            >
+              <span>🔗 {link.name}</span>
+              <span className={styles.searchLinkMeta}>
+                Filter by {fmtDate(flight.date)} →
+              </span>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
