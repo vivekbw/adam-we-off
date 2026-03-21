@@ -46,34 +46,85 @@ function resolveCoords(code: string): [number, number] | null {
   return COORDS[code] ?? null;
 }
 
-function arcPoints(
+function normalizeLongitude(value: number) {
+  if (value > 180) return value - 360;
+  if (value < -180) return value + 360;
+  return value;
+}
+
+function curvedRouteSegments(
   from: [number, number],
   to: [number, number],
-  segments = 60
-): [number, number][] {
-  const points: [number, number][] = [];
-  const dLng = to[1] - from[1];
-  const useDateline = Math.abs(dLng) > 180;
+  steps = 72,
+): [number, number][][] {
+  const [startLat, startLng] = from;
+  const [endLat, rawEndLng] = to;
+  let endLng = rawEndLng;
+  let deltaLng = endLng - startLng;
 
-  for (let i = 0; i <= segments; i++) {
-    const t = i / segments;
-    const lat = from[0] + (to[0] - from[0]) * t;
-    let lng: number;
+  if (Math.abs(deltaLng) > 180) {
+    endLng += deltaLng > 0 ? -360 : 360;
+    deltaLng = endLng - startLng;
+  }
 
-    if (useDateline) {
-      const adjusted = dLng > 0 ? dLng - 360 : dLng + 360;
-      lng = from[1] + adjusted * t;
-      if (lng > 180) lng -= 360;
-      if (lng < -180) lng += 360;
-    } else {
-      lng = from[1] + dLng * t;
+  const deltaLat = endLat - startLat;
+  const controlLng = startLng + deltaLng * 0.5;
+  const averageLat = (startLat + endLat) / 2;
+  const curveDirection = averageLat >= 0 ? 1 : -1;
+  const curveLift = Math.min(32, Math.max(8, Math.abs(deltaLng) * 0.16 + Math.abs(deltaLat) * 0.35));
+  const controlLat = Math.max(
+    -80,
+    Math.min(80, averageLat + curveLift * curveDirection),
+  );
+
+  const rawPath: [number, number][] = [];
+  for (let step = 0; step <= steps; step += 1) {
+    const t = step / steps;
+    const inv = 1 - t;
+    const lat =
+      inv * inv * startLat +
+      2 * inv * t * controlLat +
+      t * t * endLat;
+    const lng =
+      inv * inv * startLng +
+      2 * inv * t * controlLng +
+      t * t * endLng;
+    rawPath.push([lat, lng]);
+  }
+
+  const grouped: [number, number][][] = [];
+  let currentGroup: [number, number][] = [[rawPath[0][0], normalizeLongitude(rawPath[0][1])]];
+
+  for (let index = 1; index < rawPath.length; index += 1) {
+    const previous = rawPath[index - 1];
+    const point = rawPath[index];
+
+    if (previous[1] >= -180 && point[1] < -180) {
+      const ratio = (-180 - previous[1]) / (point[1] - previous[1]);
+      const latAtBoundary = previous[0] + (point[0] - previous[0]) * ratio;
+      currentGroup.push([latAtBoundary, -180]);
+      grouped.push(currentGroup);
+      currentGroup = [[latAtBoundary, 180], [point[0], normalizeLongitude(point[1])]];
+      continue;
     }
 
-    const elevation =
-      Math.sin(Math.PI * t) * Math.max(1.5, Math.abs(dLng) * 0.04);
-    points.push([lat + elevation, lng]);
+    if (previous[1] <= 180 && point[1] > 180) {
+      const ratio = (180 - previous[1]) / (point[1] - previous[1]);
+      const latAtBoundary = previous[0] + (point[0] - previous[0]) * ratio;
+      currentGroup.push([latAtBoundary, 180]);
+      grouped.push(currentGroup);
+      currentGroup = [[latAtBoundary, -180], [point[0], normalizeLongitude(point[1])]];
+      continue;
+    }
+
+    currentGroup.push([point[0], normalizeLongitude(point[1])]);
   }
-  return points;
+
+  if (currentGroup.length > 0) {
+    grouped.push(currentGroup);
+  }
+
+  return grouped.filter((group) => group.length > 1);
 }
 
 interface MapSegment {
@@ -162,7 +213,9 @@ function FlightGlobeInner({
         keyboard: true,
         minZoom: 2,
         maxZoom: 10,
-        worldCopyJump: true,
+        worldCopyJump: false,
+        maxBounds: [[-85, -180], [85, 180]],
+        maxBoundsViscosity: 1,
       });
 
       const bounds = L.latLngBounds(
@@ -175,8 +228,13 @@ function FlightGlobeInner({
       L.control.zoom({ position: 'topright' }).addTo(map);
 
       L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-        { maxZoom: 18 }
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+        { maxZoom: 18, noWrap: true }
+      ).addTo(map);
+
+      L.tileLayer(
+        'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+        { maxZoom: 18, opacity: 0.3, noWrap: true }
       ).addTo(map);
 
       const cities = new Map<
@@ -206,18 +264,30 @@ function FlightGlobeInner({
       }
 
       for (const s of segments) {
-        const color = '#2563EB';
-        const points = arcPoints(s.from, s.to);
+        const color = '#f05a28';
+        const pathGroups = curvedRouteSegments(s.from, s.to);
 
-        L.polyline(points, {
-          color,
-          weight: 2.5,
-          opacity: 0.7,
-          smoothFactor: 1.5,
-        }).addTo(map);
+        pathGroups.forEach((group) => {
+          L.polyline(group, {
+            color: '#fff7ed',
+            weight: 5,
+            opacity: 0.5,
+            smoothFactor: 1,
+            lineCap: 'round',
+          }).addTo(map);
 
-        const midIdx = Math.floor(points.length / 2);
-        const midPoint = points[midIdx];
+          L.polyline(group, {
+            color,
+            weight: 3.25,
+            opacity: 0.92,
+            smoothFactor: 1,
+            lineCap: 'round',
+          }).addTo(map);
+        });
+
+        const midGroup = pathGroups[Math.floor(pathGroups.length / 2)] ?? pathGroups[0];
+        const midIdx = Math.floor(midGroup.length / 2);
+        const midPoint = midGroup[midIdx];
         const numIcon = L.divIcon({
           className: 'flight-route-num',
           html: `<div class="flight-route-num-badge">${s.order}</div>`,

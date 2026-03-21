@@ -81,6 +81,7 @@ export default function SectionPage() {
             onImportFlights={importFlights}
             onDeleteFlight={deleteFlight}
             itinerary={itinerary}
+            travelers={buddies}
           />
         );
       case 'stays':

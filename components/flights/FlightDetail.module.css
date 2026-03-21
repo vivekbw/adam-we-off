@@ -76,6 +76,18 @@
   color: var(--color-text);
 }
 
+.travelersSection {
+  margin-bottom: var(--space-4);
+}
+
+.travelersTitle {
+  margin-bottom: var(--space-2);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
 .row {
   display: flex;
   justify-content: space-between;

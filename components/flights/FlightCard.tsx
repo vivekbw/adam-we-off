@@ -1,6 +1,7 @@
 'use client';
 
 import type { Flight } from '@/lib/constants';
+import type { BuddyRow } from '@/hooks/useBuddies';
 import { fmtDate } from '@/lib/constants';
 import { getAllFlightWarnings } from '@/lib/flights/insights';
 import { Button } from '@/components/ui/button';
@@ -15,17 +16,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { TravelerStatusChips } from './TravelerStatusChips';
 import styles from './FlightCard.module.css';
 
 export interface FlightCardProps {
   flight: Flight;
   warnings?: string[];
+  travelers?: BuddyRow[];
   isSelected: boolean;
   onClick: () => void;
   onDelete?: (id: string) => void;
+  onToggleTravelerStatus?: (travelerName: string) => void;
 }
 
-export function FlightCard({ flight, warnings = [], isSelected, onClick, onDelete }: FlightCardProps) {
+export function FlightCard({
+  flight,
+  warnings = [],
+  travelers = [],
+  isSelected,
+  onClick,
+  onDelete,
+  onToggleTravelerStatus,
+}: FlightCardProps) {
   const mergedWarnings = getAllFlightWarnings(flight, warnings);
   const statusClass =
     flight.status === 'Booked' ? styles.tagGreen : styles.tagYellow;
@@ -77,6 +89,15 @@ export function FlightCard({ flight, warnings = [], isSelected, onClick, onDelet
           <span className={styles.cost}>~${flight.cost} CAD</span>
         )}
       </div>
+      {travelers.length > 0 && (
+        <div className={styles.travelersRow} onClick={(event) => event.stopPropagation()}>
+          <TravelerStatusChips
+            flight={flight}
+            travelers={travelers}
+            onToggle={onToggleTravelerStatus}
+          />
+        </div>
+      )}
       {Object.keys(flight.seats).length > 0 && (
         <div className={styles.seatsRow}>
           {Object.entries(flight.seats).map(([name, seat]) => (

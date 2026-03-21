@@ -473,6 +473,7 @@ export function parseExpediaFlightPdfText(text: string, sourceFile: string): Imp
     airline: airlineLine?.trim() || 'Imported flight',
     status: 'Booked',
     seats: seatNumber && firstName ? { [firstName]: seatNumber } : undefined,
+    travelerStatuses: firstName ? { [firstName]: 'Booked' } : undefined,
     cost: extractAmount(lines),
   };
 
@@ -563,6 +564,7 @@ export function parseGenericFlightDocumentText(
     airline,
     status: 'Booked',
     seats: {},
+    travelerStatuses: {},
     cost: extractAnyAmount(lines),
   };
 

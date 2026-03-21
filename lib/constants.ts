@@ -78,6 +78,7 @@ export interface Flight {
   airline: string;
   status: string;
   seats: Record<string, string>;
+  travelerStatuses: Record<string, 'Booked' | 'Need to Book'>;
   cost: number | null;
 }
 
@@ -159,6 +160,7 @@ export const SEED_FLIGHTS: Flight[] = [
     airline: "Air Canada",
     status: "Booked",
     seats: { Adam: "—", Kate: "—", Vienna: "—", You: "—" },
+    travelerStatuses: {},
     cost: 770,
   },
   {
@@ -175,6 +177,7 @@ export const SEED_FLIGHTS: Flight[] = [
     airline: "Vietnam Airlines",
     status: "Booked",
     seats: {},
+    travelerStatuses: {},
     cost: 450,
   },
   {
@@ -191,6 +194,7 @@ export const SEED_FLIGHTS: Flight[] = [
     airline: "Thai AirAsia",
     status: "Booked",
     seats: {},
+    travelerStatuses: {},
     cost: 100,
   },
   {
@@ -207,6 +211,7 @@ export const SEED_FLIGHTS: Flight[] = [
     airline: "Thai AirAsia",
     status: "Booked",
     seats: { Adam: "44H", Kate: "44J" },
+    travelerStatuses: {},
     cost: 80,
   },
   {
@@ -223,6 +228,7 @@ export const SEED_FLIGHTS: Flight[] = [
     airline: "AirAsia",
     status: "Booked",
     seats: {},
+    travelerStatuses: {},
     cost: 140,
   },
   {
@@ -239,6 +245,7 @@ export const SEED_FLIGHTS: Flight[] = [
     airline: "Connecting",
     status: "Need to Book",
     seats: {},
+    travelerStatuses: {},
     cost: null,
   },
 ];

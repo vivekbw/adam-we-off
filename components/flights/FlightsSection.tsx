@@ -4,9 +4,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plane, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Flight, ItinerarySegment } from '@/lib/constants';
+import type { BuddyRow } from '@/hooks/useBuddies';
 import { fmtDate } from '@/lib/constants';
 import { getFlightValidationWarnings, type ImportedFlightCandidate } from '@/lib/flights/import';
 import { getAllFlightWarnings } from '@/lib/flights/insights';
+import {
+  deriveFlightStatusFromTravelerStatuses,
+  type FlightTravelerStatus,
+  getTravelerStatusesForFlight,
+  seedTravelerStatuses,
+} from '@/lib/flights/travelers';
 import { FlightCard } from './FlightCard';
 import { FlightDetail } from './FlightDetail';
 import { FlightGlobe } from './FlightGlobe';
@@ -23,6 +30,7 @@ export interface FlightsSectionProps {
   onImportFlights?: (partials: Partial<Flight>[]) => Promise<Flight[]>;
   onDeleteFlight?: (id: string) => void;
   itinerary?: ItinerarySegment[];
+  travelers?: BuddyRow[];
 }
 
 interface SuggestedRoute {
@@ -81,6 +89,7 @@ export function FlightsSection({
   onImportFlights,
   onDeleteFlight,
   itinerary = [],
+  travelers = [],
 }: FlightsSectionProps) {
   const [selected, setSelected] = useState<Flight | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -93,6 +102,10 @@ export function FlightsSection({
   const suggested = useMemo(
     () => computeSuggestedRoutes(itinerary, flights),
     [itinerary, flights]
+  );
+  const travelerNames = useMemo(
+    () => travelers.map((traveler) => traveler.name),
+    [travelers],
   );
 
   const flagLookup = useMemo(() => {
@@ -116,11 +129,41 @@ export function FlightsSection({
     return next;
   }, [flights, itinerary]);
 
+  const displayFlights = useMemo(
+    () =>
+      flights.map((flight) => ({
+        ...flight,
+        status: deriveFlightStatusFromTravelerStatuses(
+          getTravelerStatusesForFlight(flight, travelerNames),
+          flight.status,
+        ),
+      })),
+    [flights, travelerNames],
+  );
+
+  useEffect(() => {
+    if (!onUpdateFlight || travelerNames.length === 0) return;
+
+    const unseededFlights = flights.filter(
+      (flight) => Object.keys(flight.travelerStatuses).length === 0,
+    );
+
+    if (unseededFlights.length === 0) return;
+
+    unseededFlights.forEach((flight) => {
+      const travelerStatuses = seedTravelerStatuses(flight, travelerNames);
+      void onUpdateFlight(flight.id, {
+        travelerStatuses,
+        status: deriveFlightStatusFromTravelerStatuses(travelerStatuses, flight.status),
+      });
+    });
+  }, [flights, onUpdateFlight, travelerNames]);
+
   useEffect(() => {
     if (!selected) return;
-    const nextSelected = flights.find((flight) => flight.id === selected.id) ?? null;
+    const nextSelected = displayFlights.find((flight) => flight.id === selected.id) ?? null;
     setSelected(nextSelected);
-  }, [flights, selected?.id]);
+  }, [displayFlights, selected?.id]);
 
   const prepareFlight = (partial: Partial<Flight>, existing?: Partial<Flight>) => {
     const from = partial.from ?? existing?.from ?? '';
@@ -143,17 +186,17 @@ export function FlightsSection({
 
   const warningsByFlight = useMemo(() => {
     const map: Record<string, string[]> = {};
-    for (const flight of flights) {
+    for (const flight of displayFlights) {
       const warnings = getAllFlightWarnings(flight, [
         ...(importWarnings[flight.id] ?? []),
-        ...getFlightValidationWarnings(flight, itinerary, flights),
+        ...getFlightValidationWarnings(flight, itinerary, displayFlights),
       ]);
       if (warnings.length > 0) {
         map[flight.id] = warnings;
       }
     }
     return map;
-  }, [flights, importWarnings, itinerary]);
+  }, [displayFlights, importWarnings, itinerary]);
 
   const handleCardClick = (flight: Flight) => {
     setSelected((prev) => (prev?.id === flight.id ? null : flight));
@@ -262,15 +305,37 @@ export function FlightsSection({
     setShowAdd(true);
   };
 
+  const handleToggleTravelerStatus = async (flight: Flight, travelerName: string) => {
+    if (!onUpdateFlight) return;
+
+    const currentStatuses = getTravelerStatusesForFlight(flight, travelerNames);
+    const nextStatus = currentStatuses[travelerName] === 'Booked' ? 'Need to Book' : 'Booked';
+    const travelerStatuses: Record<string, FlightTravelerStatus> = {
+      ...flight.travelerStatuses,
+      [travelerName]: nextStatus,
+    };
+
+    await onUpdateFlight(flight.id, {
+      travelerStatuses,
+      status: deriveFlightStatusFromTravelerStatuses(
+        getTravelerStatusesForFlight(
+          { ...flight, travelerStatuses },
+          travelerNames,
+        ),
+        flight.status,
+      ),
+    });
+  };
+
   return (
     <div className={styles.page}>
-      <FlightGlobe flights={flights} itinerary={itinerary} />
+      <FlightGlobe flights={displayFlights} itinerary={itinerary} />
 
       <header className={styles.header}>
         <div>
           <h2 className={styles.heading}>Flights</h2>
           <p className={styles.subheading}>
-            {flights.length} flight {flights.length === 1 ? 'segment' : 'segments'}
+            {displayFlights.length} flight {displayFlights.length === 1 ? 'segment' : 'segments'}
           </p>
         </div>
         {onAddFlight && (
@@ -307,14 +372,18 @@ export function FlightsSection({
 
       <div className={styles.grid}>
         <div className={styles.list}>
-          {flights.map((flight) => (
+          {displayFlights.map((flight) => (
             <FlightCard
               key={flight.id}
               flight={flight}
               warnings={warningsByFlight[flight.id] ?? []}
+              travelers={travelers}
               isSelected={selected?.id === flight.id}
               onClick={() => handleCardClick(flight)}
               onDelete={onDeleteFlight}
+              onToggleTravelerStatus={(travelerName) =>
+                void handleToggleTravelerStatus(flight, travelerName)
+              }
             />
           ))}
         </div>
@@ -325,6 +394,10 @@ export function FlightsSection({
               flight={selected}
               warnings={warningsByFlight[selected.id] ?? []}
               onEdit={onUpdateFlight ? openEditFlight : undefined}
+              travelers={travelers}
+              onToggleTravelerStatus={(travelerName) =>
+                void handleToggleTravelerStatus(selected, travelerName)
+              }
             />
           )}
         </aside>

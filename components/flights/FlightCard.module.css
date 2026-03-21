@@ -72,6 +72,10 @@
   align-items: center;
 }
 
+.travelersRow {
+  margin-top: var(--space-3);
+}
+
 .meta {
   font-size: 0.75rem;
   color: var(--color-text-muted);

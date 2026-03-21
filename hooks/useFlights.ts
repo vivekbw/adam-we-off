@@ -3,11 +3,16 @@
 import useSWR from 'swr';
 import { supabase } from '@/lib/supabase/client';
 import { SEED_FLIGHTS, type Flight } from '@/lib/constants';
+import {
+  mergeFlightSeatsPayload,
+  splitFlightSeatsPayload,
+} from '@/lib/flights/travelers';
 
 const isSupabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 function toFlight(row: Record<string, unknown>): Flight {
   const r = row as Record<string, unknown>;
+  const { seats, travelerStatuses } = splitFlightSeatsPayload(r.seats);
   return {
     id: String(r.id ?? ''),
     from: String(r.from ?? ''),
@@ -21,7 +26,8 @@ function toFlight(row: Record<string, unknown>): Flight {
     arr: String(r.arr ?? ''),
     airline: String(r.airline ?? ''),
     status: String(r.status ?? ''),
-    seats: (typeof r.seats === 'object' && r.seats !== null ? r.seats : {}) as Record<string, string>,
+    seats,
+    travelerStatuses,
     cost: r.cost != null ? Number(r.cost) : null,
   };
 }
@@ -41,7 +47,7 @@ function flightToRow(f: Flight, tripId: string) {
     arr: f.arr,
     airline: f.airline,
     status: f.status,
-    seats: f.seats,
+    seats: mergeFlightSeatsPayload(f.seats, f.travelerStatuses),
     cost: f.cost,
   };
 }
@@ -111,6 +117,7 @@ export function useFlights(tripId: string) {
       airline: partial.airline ?? '',
       status: partial.status ?? 'Need to Book',
       seats: partial.seats ?? {},
+      travelerStatuses: partial.travelerStatuses ?? {},
       cost: partial.cost ?? null,
     };
     const updated = sortFlights([...flights, newFlight]);
@@ -144,6 +151,7 @@ export function useFlights(tripId: string) {
         airline: partial.airline ?? existing?.airline ?? '',
         status: partial.status ?? existing?.status ?? 'Booked',
         seats: partial.seats ?? existing?.seats ?? {},
+        travelerStatuses: partial.travelerStatuses ?? existing?.travelerStatuses ?? {},
         cost: partial.cost ?? existing?.cost ?? null,
       };
 
