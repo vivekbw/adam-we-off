@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import styles from './page.module.css';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const showLocalBypass = process.env.NODE_ENV !== 'production';
 
   async function signInWithGoogle() {
     if (!supabase) return;
@@ -66,6 +68,11 @@ export default function LoginPage() {
               </svg>
               {loading ? 'Signing in…' : 'Continue with Google'}
             </button>
+            {showLocalBypass && (
+              <Link href="/" className={styles.devBypassBtn}>
+                Continue locally
+              </Link>
+            )}
             <p className={styles.terms}>
               By continuing, you agree to our terms. No spam, ever.
             </p>

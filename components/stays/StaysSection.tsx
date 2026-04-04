@@ -1,26 +1,37 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import type { Stay, ItinerarySegment } from '@/lib/constants';
+import type { ImportedStayCandidate } from '@/lib/stays/import';
+import { flagForCountry } from '@/lib/country-flags';
 import { StayCoverage } from './StayCoverage';
 import { StayCard } from './StayCard';
 import { AddStayForm } from './AddStayForm';
+import { StayImportDropzone } from './StayImportDropzone';
+import { StayImportReviewDialog } from './StayImportReviewDialog';
 import { Button } from '@/components/ui/button';
 import styles from './StaysSection.module.css';
 
 export interface StaysSectionProps {
   stays: Stay[];
   onUpdateStay: (id: string, changes: Partial<Stay>) => void;
-  onAddStay?: (partial: Partial<Stay>) => void;
+  onAddStay?: (partial: Partial<Stay>) => void | Promise<void>;
+  onImportStays?: (partials: Partial<Stay>[]) => Promise<Stay[]>;
   onDeleteStay?: (id: string) => void;
   itinerary: ItinerarySegment[];
   buddyNames?: string[];
+}
+
+function normalizePlace(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 export function StaysSection({
   stays,
   onUpdateStay,
   onAddStay,
+  onImportStays,
   onDeleteStay,
   itinerary,
   buddyNames = [],
@@ -29,6 +40,10 @@ export function StaysSection({
   const [priceFilter, setPriceFilter] = useState(100);
   const [vibeFilter, setVibeFilter] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingStay, setEditingStay] = useState<Stay | null>(null);
+  const [stayDefaults, setStayDefaults] = useState<Partial<Stay> | undefined>();
+  const [showImportReview, setShowImportReview] = useState(false);
+  const [importDrafts, setImportDrafts] = useState<ImportedStayCandidate[]>([]);
 
   const bookedCount = stays.filter((s) => s.status === 'Booked').length;
 
@@ -65,6 +80,92 @@ export function StaysSection({
     setSelectedStayId(stay.id);
   };
 
+  const itineraryLookup = useMemo(() => {
+    const map = new Map<string, { country: string; flag: string }>();
+    itinerary.forEach((segment) => {
+      map.set(normalizePlace(segment.city), {
+        country: segment.country,
+        flag: segment.flag,
+      });
+    });
+    return map;
+  }, [itinerary]);
+
+  const prepareStay = (partial: Partial<Stay>, existing?: Partial<Stay>) => {
+    const city = partial.city ?? existing?.city ?? '';
+    const countryHint = itineraryLookup.get(normalizePlace(city));
+    const country = partial.country ?? existing?.country ?? countryHint?.country ?? '';
+    return {
+      ...partial,
+      country,
+      flag: partial.flag ?? existing?.flag ?? countryHint?.flag ?? flagForCountry(country),
+    };
+  };
+
+  const openAddStay = () => {
+    setEditingStay(null);
+    setStayDefaults(undefined);
+    setShowAdd(true);
+  };
+
+  const openEditStay = (stay: Stay) => {
+    setEditingStay(stay);
+    setStayDefaults(stay);
+    setShowAdd(true);
+  };
+
+  const handleImport = async (files: File[]) => {
+    if (!onImportStays) return;
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+
+    const response = await fetch('/api/stays/import', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error ?? 'Failed to import stay files.');
+    }
+
+    const imported = (payload.imported ?? []) as ImportedStayCandidate[];
+    const errors = payload.errors ?? [];
+
+    if (imported.length === 0) {
+      toast.error(errors[0]?.error ?? 'No stays were found in those files.');
+      return;
+    }
+
+    setImportDrafts(imported.map((item) => ({
+      ...item,
+      stay: prepareStay(item.stay),
+    })));
+    setShowImportReview(true);
+
+    if (errors.length > 0) {
+      toast.warning(
+        `We pulled ${imported.length} stay draft${imported.length === 1 ? '' : 's'}, but ${errors.length} file${errors.length === 1 ? '' : 's'} needed extra review.`,
+      );
+    }
+  };
+
+  const handleConfirmImport = async (drafts: ImportedStayCandidate[]) => {
+    if (!onImportStays) return;
+
+    const preparedDrafts = drafts.map((draft) => ({
+      ...draft,
+      stay: prepareStay(draft.stay),
+    }));
+    const importedStays = await onImportStays(preparedDrafts.map((item) => item.stay));
+    setImportDrafts([]);
+    setSelectedStayId(importedStays[0]?.id ?? null);
+    toast.success(
+      `Confirmed ${importedStays.length} imported stay${importedStays.length === 1 ? '' : 's'}.`,
+    );
+  };
+
   return (
     <section className={styles.section}>
       <header className={styles.header}>
@@ -75,12 +176,20 @@ export function StaysSection({
           </p>
         </div>
         {onAddStay && (
-          <Button onClick={() => setShowAdd(true)}>+ Add Stay</Button>
+          <Button onClick={openAddStay}>+ Add Stay</Button>
         )}
       </header>
 
+      {onImportStays && (
+        <StayImportDropzone onImport={handleImport} />
+      )}
+
       <div className={styles.coverage}>
-        <StayCoverage stays={stays} onSegmentClick={handleSegmentClick} />
+        <StayCoverage
+          stays={stays}
+          itinerary={itinerary}
+          onSegmentClick={handleSegmentClick}
+        />
       </div>
 
       <div className={styles.filterBar}>
@@ -134,6 +243,7 @@ export function StaysSection({
                   onUpdate={onUpdateStay}
                   onDelete={onDeleteStay}
                   buddyNames={buddyNames}
+                  onEdit={openEditStay}
                 />
               ))}
             </div>
@@ -144,11 +254,44 @@ export function StaysSection({
       {onAddStay && (
         <AddStayForm
           open={showAdd}
-          onOpenChange={setShowAdd}
-          onAdd={(partial) => {
-            onAddStay(partial);
-            setShowAdd(false);
+          onOpenChange={(open) => {
+            setShowAdd(open);
+            if (!open) {
+              setEditingStay(null);
+            }
           }}
+          onSubmit={async (partial) => {
+            const prepared = prepareStay(partial, editingStay ?? stayDefaults);
+            if (editingStay) {
+              await onUpdateStay(editingStay.id, prepared);
+            } else {
+              await onAddStay(prepared);
+            }
+          }}
+          defaults={stayDefaults}
+          buddyNames={buddyNames}
+          title={editingStay ? 'Edit Stay' : 'Add Stay'}
+          description={
+            editingStay
+              ? 'Update the stay details, dates, and booking status.'
+              : 'Add a new stay manually if you do not want to import it from a booking file.'
+          }
+          submitLabel={editingStay ? 'Save Changes' : 'Add Stay'}
+        />
+      )}
+
+      {onImportStays && (
+        <StayImportReviewDialog
+          open={showImportReview}
+          drafts={importDrafts}
+          buddyNames={buddyNames}
+          onOpenChange={(open) => {
+            setShowImportReview(open);
+            if (!open) {
+              setImportDrafts([]);
+            }
+          }}
+          onConfirm={handleConfirmImport}
         />
       )}
     </section>

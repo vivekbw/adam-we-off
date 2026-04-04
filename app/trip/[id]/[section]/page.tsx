@@ -44,7 +44,7 @@ export default function SectionPage() {
 
   const { itinerary } = useItinerary(id);
   const { flights, addFlight, updateFlight, deleteFlight, importFlights } = useFlights(id);
-  const { stays, updateStay, addStay, deleteStay } = useStays(id);
+  const { stays, updateStay, addStay, deleteStay, importStays } = useStays(id);
   const { activities, updateActivity, addActivity, deleteActivity } = useActivities(id);
   const { notes, addNote, editNote, deleteNote } = useNotes(id);
   const { buddies } = useBuddies(id);
@@ -90,6 +90,7 @@ export default function SectionPage() {
             stays={stays}
             onUpdateStay={updateStay}
             onAddStay={addStay}
+            onImportStays={importStays}
             onDeleteStay={deleteStay}
             itinerary={itinerary}
             buddyNames={buddyNames}

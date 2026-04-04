@@ -11,17 +11,6 @@ function pixelResponse() {
   });
 }
 
-const MAP_STYLES = [
-  'style=feature:all|element:geometry|color:0xf5f5f5',
-  'style=feature:water|color:0xc9e8f5',
-  'style=feature:road|visibility:off',
-  'style=feature:poi|visibility:off',
-  'style=feature:transit|visibility:off',
-  'style=feature:administrative.country|element:geometry.stroke|color:0xbdbdbd|weight:1',
-  'style=feature:administrative.country|element:labels.text.fill|color:0x9e9e9e',
-  'style=feature:landscape.natural|color:0xeaeaea',
-].join('&');
-
 export async function GET(req: NextRequest) {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) return pixelResponse();
@@ -35,6 +24,7 @@ export async function GET(req: NextRequest) {
     const center = searchParams.get('center') || '20,60';
     const zoom = searchParams.get('zoom') || '2';
     const size = searchParams.get('size') || '640x360';
+    const maptype = searchParams.get('maptype') || 'roadmap';
     const paths = searchParams.getAll('path');
     const markers = searchParams.getAll('marker');
 
@@ -44,9 +34,8 @@ export async function GET(req: NextRequest) {
       `&zoom=${zoom}`,
       `&size=${size}`,
       `&scale=2`,
-      `&maptype=roadmap`,
+      `&maptype=${encodeURIComponent(maptype)}`,
       `&key=${apiKey}`,
-      `&${MAP_STYLES}`,
     ];
 
     for (const p of paths) parts.push(`&path=${encodeURIComponent(p)}`);

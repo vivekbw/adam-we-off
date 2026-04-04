@@ -3,6 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
+  const isLocalBypassHost =
+    process.env.NODE_ENV !== 'production'
+    && ['localhost', '127.0.0.1'].includes(request.nextUrl.hostname);
 
   // Supabase may redirect OAuth codes to the site root instead of /auth/callback
   if (pathname === '/' && searchParams.has('code') && !searchParams.has('error')) {
@@ -12,6 +15,10 @@ export async function middleware(request: NextRequest) {
   }
 
   let supabaseResponse = NextResponse.next({ request });
+
+  if (isLocalBypassHost) {
+    return supabaseResponse;
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

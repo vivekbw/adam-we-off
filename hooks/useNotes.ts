@@ -2,9 +2,13 @@
 
 import useSWR from 'swr';
 import { supabase } from '@/lib/supabase/client';
-import { SEED_NOTES, type Note } from '@/lib/constants';
+import { SEED_NOTES, SEED_TRIP_ID, type Note } from '@/lib/constants';
 
 const isSupabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+
+function seedNotesForTrip(tripId: string) {
+  return tripId === SEED_TRIP_ID ? SEED_NOTES : [];
+}
 
 function toNote(row: Record<string, unknown>): Note {
   const r = row as Record<string, unknown>;
@@ -18,14 +22,14 @@ function toNote(row: Record<string, unknown>): Note {
 }
 
 async function fetchNotes(tripId: string): Promise<Note[]> {
-  if (!isSupabaseConfigured) return SEED_NOTES;
-  if (!supabase) return SEED_NOTES;
+  if (!isSupabaseConfigured) return seedNotesForTrip(tripId);
+  if (!supabase) return seedNotesForTrip(tripId);
   const { data, error } = await supabase
     .from('notes')
     .select('*')
     .eq('trip_id', tripId)
     .order('created_at', { ascending: true });
-  if (error) throw error;
+  if (error) return seedNotesForTrip(tripId);
   return (data ?? []).map(toNote);
 }
 
@@ -33,10 +37,10 @@ export function useNotes(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR(
     `notes-${tripId}`,
     () => fetchNotes(tripId),
-    { fallbackData: SEED_NOTES }
+    { fallbackData: seedNotesForTrip(tripId) }
   );
 
-  const notes = data ?? SEED_NOTES;
+  const notes = data ?? seedNotesForTrip(tripId);
 
   const addNote = async (note: Omit<Note, 'id'>) => {
     const id = `n${Date.now()}`;

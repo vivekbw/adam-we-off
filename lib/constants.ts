@@ -1,6 +1,7 @@
 // ── IMAGE MAPS (Unsplash w=600&q=80 for cities, w=400&q=80 for activities/stays) ──
 
 export const CITY_IMAGES: Record<string, string> = {
+  Toronto: "https://images.unsplash.com/photo-1517935706615-2717063c2225?w=600&q=80",
   Tokyo: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&q=80",
   Hanoi: "https://images.unsplash.com/photo-1557750255-c76072a7aad1?w=600&q=80",
   "Chiang Mai": "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600&q=80",
@@ -8,6 +9,8 @@ export const CITY_IMAGES: Record<string, string> = {
   "Phi Phi Islands": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
   Ubud: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80",
   Uluwatu: "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=600&q=80",
+  "South Kuta": "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=600&q=80",
+  "Bali / Kuta": "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=600&q=80",
 };
 
 export const ACTIVITY_IMAGES: Record<string, string> = {
@@ -134,6 +137,24 @@ export interface Expense {
 
 
 // ── SEED DATA ─────────────────────────────────────────────────────────────────
+
+export const SEED_TRIP_ID = "a1b2c3d4-e5f6-7890-abcd-ef1234567890";
+
+export const SEED_TRIP = {
+  id: SEED_TRIP_ID,
+  name: "Asia Summer '26",
+  start_date: "2026-05-24",
+  end_date: "2026-06-13",
+  cover_city: "Tokyo",
+  created_at: "2026-01-15T12:00:00.000Z",
+};
+
+export const SEED_BUDDIES = [
+  { id: 1, trip_id: SEED_TRIP_ID, user_id: null, name: "Adam", email: null, avatar: "A", color: "#3B82F6", role: "editor", status: "active" },
+  { id: 2, trip_id: SEED_TRIP_ID, user_id: null, name: "Kate", email: null, avatar: "K", color: "#10B981", role: "editor", status: "active" },
+  { id: 3, trip_id: SEED_TRIP_ID, user_id: null, name: "Vienna", email: null, avatar: "V", color: "#8B5CF6", role: "editor", status: "active" },
+  { id: 4, trip_id: SEED_TRIP_ID, user_id: null, name: "You", email: null, avatar: "Y", color: "#F59E0B", role: "editor", status: "active" },
+] as const;
 
 export const SEED_ITINERARY: ItinerarySegment[] = [
   { id: "i1", country: "Japan", city: "Tokyo", startDate: "2026-05-24", endDate: "2026-05-29", flag: "🇯🇵", nights: 5, countryCode: "JP" },

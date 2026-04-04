@@ -1,60 +1,136 @@
 .container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  width: 100%;
 }
 
-.bar {
+.strip {
   display: flex;
-  height: 24px;
-  border-radius: var(--radius-md);
+  align-items: stretch;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-medium);
 }
 
-.segment {
+.card {
+  position: relative;
+  min-width: 112px;
+  padding: 0;
+  border: 0;
+  background: #1a1a1a;
+  overflow: hidden;
+  text-align: left;
   cursor: pointer;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
-  min-width: 4px;
 }
 
-.segment:hover {
-  opacity: 0.9;
+.card:disabled {
+  cursor: default;
 }
 
-.segmentBooked {
-  background: #2563eb;
+.cardImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease, filter 0.35s ease;
 }
 
-.segmentPending {
-  background: var(--color-tag-red-bg);
-  border: 1px solid rgba(155, 34, 38, 0.3);
+.card:hover .cardImage {
+  transform: scale(1.03);
+  filter: brightness(1.05);
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6, 12, 22, 0.82) 0%, rgba(6, 12, 22, 0.18) 60%);
 }
 
-.chip {
+.statusWash {
+  position: absolute;
+  inset: 0;
+  opacity: 0.38;
+}
+
+.statusBooked {
+  background: linear-gradient(180deg, rgba(26, 123, 90, 0.18) 0%, rgba(28, 142, 89, 0.64) 100%);
+}
+
+.statusPending {
+  background: linear-gradient(180deg, rgba(177, 58, 74, 0.1) 0%, rgba(191, 80, 94, 0.52) 100%);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  padding: 96px var(--space-3) 38px var(--space-3);
+}
+
+.flag {
+  font-size: 1.1rem;
+  margin-bottom: var(--space-1);
+}
+
+.cityName {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+.date {
+  margin-top: var(--space-1);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.stayName {
+  margin-top: var(--space-1);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.statusTag {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  background: var(--color-bg-elevated);
+  min-height: 26px;
+  padding: 0 var(--space-2);
   border-radius: var(--radius-full);
-  font-size: 0.8125rem;
-  color: var(--color-text);
-  box-shadow: var(--shadow-subtle);
-  border: 1px solid var(--color-border);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(12px);
 }
 
-.chipFlag {
-  font-size: 1rem;
+.statusTag.statusBooked {
+  color: #e9fff4;
+  background: rgba(33, 127, 93, 0.44);
+  border: 1px solid rgba(177, 236, 205, 0.28);
 }
 
-.chipCount {
-  color: var(--color-text-muted);
-  font-weight: 500;
+.statusTag.statusPending {
+  color: #fff2f3;
+  background: rgba(161, 63, 73, 0.34);
+  border: 1px solid rgba(255, 206, 212, 0.22);
+}
+
+@media (max-width: 768px) {
+  .strip {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    min-width: 160px;
+  }
 }

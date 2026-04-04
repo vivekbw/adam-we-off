@@ -2,9 +2,13 @@
 
 import useSWR from 'swr';
 import { supabase } from '@/lib/supabase/client';
-import { SEED_ACTIVITIES, type Activity } from '@/lib/constants';
+import { SEED_ACTIVITIES, SEED_TRIP_ID, type Activity } from '@/lib/constants';
 
 const isSupabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+
+function seedActivitiesForTrip(tripId: string) {
+  return tripId === SEED_TRIP_ID ? SEED_ACTIVITIES : [];
+}
 
 function toActivity(row: Record<string, unknown>): Activity {
   const r = row as Record<string, unknown>;
@@ -26,13 +30,13 @@ function toActivity(row: Record<string, unknown>): Activity {
 }
 
 async function fetchActivities(tripId: string): Promise<Activity[]> {
-  if (!isSupabaseConfigured || !supabase) return SEED_ACTIVITIES;
+  if (!isSupabaseConfigured || !supabase) return seedActivitiesForTrip(tripId);
   const { data, error } = await supabase
     .from('activities')
     .select('*')
     .eq('trip_id', tripId)
     .order('date');
-  if (error) throw error;
+  if (error) return seedActivitiesForTrip(tripId);
   return (data ?? []).map(toActivity);
 }
 
@@ -40,10 +44,10 @@ export function useActivities(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR(
     `activities-${tripId}`,
     () => fetchActivities(tripId),
-    { fallbackData: SEED_ACTIVITIES }
+    { fallbackData: seedActivitiesForTrip(tripId) }
   );
 
-  const activities = data ?? SEED_ACTIVITIES;
+  const activities = data ?? seedActivitiesForTrip(tripId);
 
   const updateActivity = async (id: string, changes: Partial<Activity>) => {
     const updated = activities.map((a) => (a.id === id ? { ...a, ...changes } : a));

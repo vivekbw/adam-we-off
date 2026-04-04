@@ -2,9 +2,13 @@
 
 import useSWR from 'swr';
 import { supabase } from '@/lib/supabase/client';
-import { SEED_EXPENSES, type Expense } from '@/lib/constants';
+import { SEED_EXPENSES, SEED_TRIP_ID, type Expense } from '@/lib/constants';
 
 const isSupabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+
+function seedExpensesForTrip(tripId: string) {
+  return tripId === SEED_TRIP_ID ? SEED_EXPENSES : [];
+}
 
 function toExpense(row: Record<string, unknown>): Expense {
   const r = row as Record<string, unknown>;
@@ -21,14 +25,14 @@ function toExpense(row: Record<string, unknown>): Expense {
 }
 
 async function fetchExpenses(tripId: string): Promise<Expense[]> {
-  if (!isSupabaseConfigured) return SEED_EXPENSES;
-  if (!supabase) return SEED_EXPENSES;
+  if (!isSupabaseConfigured) return seedExpensesForTrip(tripId);
+  if (!supabase) return seedExpensesForTrip(tripId);
   const { data, error } = await supabase
     .from('expenses')
     .select('*')
     .eq('trip_id', tripId)
     .order('date');
-  if (error) throw error;
+  if (error) return seedExpensesForTrip(tripId);
   return (data ?? []).map(toExpense);
 }
 
@@ -36,10 +40,10 @@ export function useExpenses(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR(
     `expenses-${tripId}`,
     () => fetchExpenses(tripId),
-    { fallbackData: SEED_EXPENSES }
+    { fallbackData: seedExpensesForTrip(tripId) }
   );
 
-  const expenses = data ?? SEED_EXPENSES;
+  const expenses = data ?? seedExpensesForTrip(tripId);
 
   const addExpense = async (expense: Omit<Expense, 'id'>) => {
     const id = `e${Date.now()}`;

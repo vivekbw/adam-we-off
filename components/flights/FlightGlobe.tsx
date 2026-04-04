@@ -1,7 +1,7 @@
 'use client';
 
-import { memo, useMemo, useEffect, useRef } from 'react';
-import type { Flight, ItinerarySegment } from '@/lib/constants';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { CITY_IMAGES, type Flight, type ItinerarySegment } from '@/lib/constants';
 import styles from './FlightGlobe.module.css';
 
 const COORDS: Record<string, [number, number]> = {
@@ -37,96 +37,6 @@ const COORDS: Record<string, [number, number]> = {
   RGN: [16.9074, 96.1342],
 };
 
-const CITY_TO_CODE: Record<string, string> = {};
-for (const [code] of Object.entries(COORDS)) {
-  CITY_TO_CODE[code] = code;
-}
-
-function resolveCoords(code: string): [number, number] | null {
-  return COORDS[code] ?? null;
-}
-
-function normalizeLongitude(value: number) {
-  if (value > 180) return value - 360;
-  if (value < -180) return value + 360;
-  return value;
-}
-
-function curvedRouteSegments(
-  from: [number, number],
-  to: [number, number],
-  steps = 72,
-): [number, number][][] {
-  const [startLat, startLng] = from;
-  const [endLat, rawEndLng] = to;
-  let endLng = rawEndLng;
-  let deltaLng = endLng - startLng;
-
-  if (Math.abs(deltaLng) > 180) {
-    endLng += deltaLng > 0 ? -360 : 360;
-    deltaLng = endLng - startLng;
-  }
-
-  const deltaLat = endLat - startLat;
-  const controlLng = startLng + deltaLng * 0.5;
-  const averageLat = (startLat + endLat) / 2;
-  const curveDirection = averageLat >= 0 ? 1 : -1;
-  const curveLift = Math.min(32, Math.max(8, Math.abs(deltaLng) * 0.16 + Math.abs(deltaLat) * 0.35));
-  const controlLat = Math.max(
-    -80,
-    Math.min(80, averageLat + curveLift * curveDirection),
-  );
-
-  const rawPath: [number, number][] = [];
-  for (let step = 0; step <= steps; step += 1) {
-    const t = step / steps;
-    const inv = 1 - t;
-    const lat =
-      inv * inv * startLat +
-      2 * inv * t * controlLat +
-      t * t * endLat;
-    const lng =
-      inv * inv * startLng +
-      2 * inv * t * controlLng +
-      t * t * endLng;
-    rawPath.push([lat, lng]);
-  }
-
-  const grouped: [number, number][][] = [];
-  let currentGroup: [number, number][] = [[rawPath[0][0], normalizeLongitude(rawPath[0][1])]];
-
-  for (let index = 1; index < rawPath.length; index += 1) {
-    const previous = rawPath[index - 1];
-    const point = rawPath[index];
-
-    if (previous[1] >= -180 && point[1] < -180) {
-      const ratio = (-180 - previous[1]) / (point[1] - previous[1]);
-      const latAtBoundary = previous[0] + (point[0] - previous[0]) * ratio;
-      currentGroup.push([latAtBoundary, -180]);
-      grouped.push(currentGroup);
-      currentGroup = [[latAtBoundary, 180], [point[0], normalizeLongitude(point[1])]];
-      continue;
-    }
-
-    if (previous[1] <= 180 && point[1] > 180) {
-      const ratio = (180 - previous[1]) / (point[1] - previous[1]);
-      const latAtBoundary = previous[0] + (point[0] - previous[0]) * ratio;
-      currentGroup.push([latAtBoundary, 180]);
-      grouped.push(currentGroup);
-      currentGroup = [[latAtBoundary, -180], [point[0], normalizeLongitude(point[1])]];
-      continue;
-    }
-
-    currentGroup.push([point[0], normalizeLongitude(point[1])]);
-  }
-
-  if (currentGroup.length > 0) {
-    grouped.push(currentGroup);
-  }
-
-  return grouped.filter((group) => group.length > 1);
-}
-
 interface MapSegment {
   from: [number, number];
   to: [number, number];
@@ -140,6 +50,124 @@ interface MapSegment {
   order: number;
 }
 
+interface ProjectedPoint {
+  x: number;
+  y: number;
+}
+
+interface ContinentLabel {
+  name: string;
+  left: string;
+  top: string;
+}
+
+interface CityMarker {
+  coords: [number, number];
+  city: string;
+  flag: string;
+  code: string;
+  imageUrl: string | null;
+}
+
+interface MarkerOffset {
+  x: number;
+  y: number;
+  labelX: number;
+  labelY: number;
+}
+
+const REFERENCE_MAP_URL =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/World_location_map_%28equirectangular_180%29.svg/1280px-World_location_map_%28equirectangular_180%29.svg.png';
+
+const MARKER_OFFSETS: Record<string, MarkerOffset> = {
+  YYZ: { x: 0, y: -8, labelX: 0, labelY: 10 },
+  NRT: { x: 28, y: -8, labelX: 18, labelY: 10 },
+  HAN: { x: -16, y: 2, labelX: -8, labelY: 12 },
+  CNX: { x: -10, y: 20, labelX: -8, labelY: 12 },
+  BKK: { x: 8, y: 36, labelX: 6, labelY: 12 },
+  DPS: { x: 24, y: 24, labelX: 16, labelY: 12 },
+};
+
+const CONTINENT_LABELS: ContinentLabel[] = [
+  { name: 'North America', left: '12%', top: '27%' },
+  { name: 'South America', left: '28%', top: '73%' },
+  { name: 'Europe', left: '49%', top: '24%' },
+  { name: 'Africa', left: '52%', top: '58%' },
+  { name: 'Asia', left: '69%', top: '26%' },
+  { name: 'Oceania', left: '84%', top: '77%' },
+];
+
+function resolveCoords(code: string): [number, number] | null {
+  return COORDS[code] ?? null;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function projectPoint([lat, lng]: [number, number], width: number, height: number): ProjectedPoint {
+  const x = ((lng + 180) / 360) * width;
+  const y = ((90 - lat) / 180) * height;
+  return { x, y };
+}
+
+function describeRoute(
+  from: [number, number],
+  to: [number, number],
+  width: number,
+  height: number,
+) {
+  const start = projectPoint(from, width, height);
+  const end = projectPoint(to, width, height);
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const distance = Math.hypot(dx, dy) || 1;
+  const lift = clamp(distance * 0.22, 42, 120);
+  const controlX = (start.x + end.x) / 2;
+  const controlY = clamp((start.y + end.y) / 2 - lift, 24, height - 24);
+  const path = `M ${start.x} ${start.y} Q ${controlX} ${controlY} ${end.x} ${end.y}`;
+  const labelX = (start.x + 2 * controlX + end.x) / 4;
+  const labelY = (start.y + 2 * controlY + end.y) / 4;
+
+  return {
+    start,
+    end,
+    control: { x: controlX, y: controlY },
+    label: { x: labelX, y: labelY },
+    path,
+  };
+}
+
+function useElementSize<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const update = () => {
+      setSize({
+        width: node.clientWidth,
+        height: node.clientHeight,
+      });
+    };
+
+    update();
+
+    const observer = new ResizeObserver(() => update());
+    observer.observe(node);
+    window.addEventListener('resize', update);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  return [ref, size] as const;
+}
+
 function FlightGlobeInner({
   flights,
   itinerary = [],
@@ -147,178 +175,85 @@ function FlightGlobeInner({
   flights: Flight[];
   itinerary?: ItinerarySegment[];
 }) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
+  const [mapRef, size] = useElementSize<HTMLDivElement>();
 
   const flagLookup = useMemo(() => {
     const map: Record<string, string> = {};
-    for (const seg of itinerary) {
-      map[seg.city.toLowerCase()] = seg.flag;
-    }
+    itinerary.forEach((segment) => {
+      map[segment.city.toLowerCase()] = segment.flag;
+    });
     return map;
   }, [itinerary]);
 
   const segments = useMemo<MapSegment[]>(() => {
     const sorted = [...flights].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
     return sorted
-      .map((f, i) => {
-        const from = resolveCoords(f.fromCode);
-        const to = resolveCoords(f.toCode);
+      .map((flight, index) => {
+        const from = resolveCoords(flight.fromCode);
+        const to = resolveCoords(flight.toCode);
         if (!from || !to) return null;
+
         return {
           from,
           to,
-          fromCode: f.fromCode,
-          toCode: f.toCode,
-          fromCity: f.from,
-          toCity: f.to,
-          fromFlag: f.fromFlag || flagLookup[f.from.toLowerCase()] || '',
-          toFlag: f.toFlag || flagLookup[f.to.toLowerCase()] || '',
-          status: f.status,
-          order: i + 1,
+          fromCode: flight.fromCode,
+          toCode: flight.toCode,
+          fromCity: flight.from,
+          toCity: flight.to,
+          fromFlag: flight.fromFlag || flagLookup[flight.from.toLowerCase()] || '',
+          toFlag: flight.toFlag || flagLookup[flight.to.toLowerCase()] || '',
+          status: flight.status,
+          order: index + 1,
         };
       })
-      .filter((s): s is MapSegment => s !== null);
+      .filter((segment): segment is MapSegment => segment !== null);
   }, [flights, flagLookup]);
 
-  useEffect(() => {
-    if (!mapRef.current || segments.length === 0) return;
+  const cities = useMemo(() => {
+    const entries = new Map<string, CityMarker>();
 
-    let cancelled = false;
-
-    async function init() {
-      const L = (await import('leaflet')).default;
-      // @ts-expect-error CSS import handled by webpack
-      await import('leaflet/dist/leaflet.css');
-
-      if (cancelled || !mapRef.current) return;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-
-      const allLats = segments.flatMap((s) => [s.from[0], s.to[0]]);
-      const allLngs = segments.flatMap((s) => [s.from[1], s.to[1]]);
-
-      const map = L.map(mapRef.current, {
-        zoomControl: false,
-        attributionControl: false,
-        scrollWheelZoom: true,
-        dragging: true,
-        doubleClickZoom: true,
-        touchZoom: true,
-        keyboard: true,
-        minZoom: 2,
-        maxZoom: 10,
-        worldCopyJump: false,
-        maxBounds: [[-85, -180], [85, 180]],
-        maxBoundsViscosity: 1,
-      });
-
-      const bounds = L.latLngBounds(
-        [Math.min(...allLats) - 4, Math.min(...allLngs) - 8],
-        [Math.max(...allLats) + 4, Math.max(...allLngs) + 8]
-      );
-      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
-      mapInstanceRef.current = map;
-
-      L.control.zoom({ position: 'topright' }).addTo(map);
-
-      L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-        { maxZoom: 18, noWrap: true }
-      ).addTo(map);
-
-      L.tileLayer(
-        'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-        { maxZoom: 18, opacity: 0.3, noWrap: true }
-      ).addTo(map);
-
-      const cities = new Map<
-        string,
-        { coords: [number, number]; city: string; flag: string; code: string; firstOrder: number }
-      >();
-
-      for (const s of segments) {
-        if (!cities.has(s.fromCode)) {
-          cities.set(s.fromCode, {
-            coords: s.from,
-            city: s.fromCity,
-            flag: s.fromFlag,
-            code: s.fromCode,
-            firstOrder: s.order,
-          });
-        }
-        if (!cities.has(s.toCode)) {
-          cities.set(s.toCode, {
-            coords: s.to,
-            city: s.toCity,
-            flag: s.toFlag,
-            code: s.toCode,
-            firstOrder: s.order,
-          });
-        }
-      }
-
-      for (const s of segments) {
-        const color = '#f05a28';
-        const pathGroups = curvedRouteSegments(s.from, s.to);
-
-        pathGroups.forEach((group) => {
-          L.polyline(group, {
-            color: '#fff7ed',
-            weight: 5,
-            opacity: 0.5,
-            smoothFactor: 1,
-            lineCap: 'round',
-          }).addTo(map);
-
-          L.polyline(group, {
-            color,
-            weight: 3.25,
-            opacity: 0.92,
-            smoothFactor: 1,
-            lineCap: 'round',
-          }).addTo(map);
+    segments.forEach((segment) => {
+      if (!entries.has(segment.fromCode)) {
+        entries.set(segment.fromCode, {
+          coords: segment.from,
+          city: segment.fromCity,
+          flag: segment.fromFlag,
+          code: segment.fromCode,
+          imageUrl: CITY_IMAGES[segment.fromCity] ?? CITY_IMAGES[segment.toCity] ?? null,
         });
-
-        const midGroup = pathGroups[Math.floor(pathGroups.length / 2)] ?? pathGroups[0];
-        const midIdx = Math.floor(midGroup.length / 2);
-        const midPoint = midGroup[midIdx];
-        const numIcon = L.divIcon({
-          className: 'flight-route-num',
-          html: `<div class="flight-route-num-badge">${s.order}</div>`,
-          iconSize: [22, 22],
-          iconAnchor: [11, 11],
+      }
+      if (!entries.has(segment.toCode)) {
+        entries.set(segment.toCode, {
+          coords: segment.to,
+          city: segment.toCity,
+          flag: segment.toFlag,
+          code: segment.toCode,
+          imageUrl: CITY_IMAGES[segment.toCity] ?? CITY_IMAGES[segment.fromCity] ?? null,
         });
-        L.marker(midPoint, { icon: numIcon, interactive: false }).addTo(map);
       }
+    });
 
-      for (const [, info] of cities) {
-        const icon = L.divIcon({
-          className: 'flight-city-marker',
-          html: `<div class="flight-city-dot"></div>
-                 <div class="flight-city-label">${info.flag ? info.flag + ' ' : ''}${info.city}</div>`,
-          iconSize: [0, 0],
-          iconAnchor: [0, 0],
-        });
-
-        L.marker(info.coords, { icon }).addTo(map);
-      }
-    }
-
-    init();
-    return () => {
-      cancelled = true;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
+    return Array.from(entries.values());
   }, [segments]);
+
+  const projectedRoutes = useMemo(() => {
+    if (size.width === 0 || size.height === 0) return [];
+    return segments.map((segment) => ({
+      ...segment,
+      ...describeRoute(segment.from, segment.to, size.width, size.height),
+    }));
+  }, [segments, size.height, size.width]);
+
+  const projectedCities = useMemo(() => {
+    if (size.width === 0 || size.height === 0) return [];
+    return cities.map((city) => ({
+      ...city,
+      point: projectPoint(city.coords, size.width, size.height),
+    }));
+  }, [cities, size.height, size.width]);
 
   if (segments.length === 0) {
     return (
@@ -330,7 +265,100 @@ function FlightGlobeInner({
 
   return (
     <div className={styles.wrapper}>
-      <div ref={mapRef} className={styles.map} />
+      <div ref={mapRef} className={styles.map}>
+        <img
+          src={REFERENCE_MAP_URL}
+          alt=""
+          className={styles.mapImage}
+          aria-hidden="true"
+        />
+        <div className={styles.mapTint} />
+        <svg
+          className={styles.routeSvg}
+          viewBox={`0 0 ${Math.max(size.width, 1)} ${Math.max(size.height, 1)}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="flight-route-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ffb066" />
+              <stop offset="50%" stopColor="#ff7f50" />
+              <stop offset="100%" stopColor="#ff5470" />
+            </linearGradient>
+          </defs>
+
+          {projectedRoutes.map((segment) => (
+            <g key={`${segment.fromCode}-${segment.toCode}-${segment.order}`}>
+              <path
+                d={segment.path}
+                className={styles.routeGlow}
+              />
+              <path
+                d={segment.path}
+                className={styles.routePath}
+              />
+              <g transform={`translate(${segment.label.x}, ${segment.label.y})`}>
+                <circle r="12" className={styles.routeBadge} />
+                <text textAnchor="middle" dominantBaseline="central" className={styles.routeBadgeText}>
+                  {segment.order}
+                </text>
+              </g>
+            </g>
+          ))}
+        </svg>
+
+        <div className={styles.markerLayer}>
+          {CONTINENT_LABELS.map((label) => (
+            <div
+              key={label.name}
+              className={styles.continentLabel}
+              style={{ left: label.left, top: label.top }}
+            >
+              {label.name}
+            </div>
+          ))}
+          {projectedCities.map((city) => {
+            const offset = MARKER_OFFSETS[city.code] ?? { x: 0, y: 0, labelX: 0, labelY: 10 };
+            return (
+              <div
+                key={city.code}
+                className={styles.marker}
+                style={{
+                  left: `${city.point.x + offset.x}px`,
+                  top: `${city.point.y + offset.y}px`,
+                }}
+              >
+                <div className={styles.pinStack}>
+                  <div className={styles.pinThumb}>
+                    {city.imageUrl ? (
+                      <img
+                        src={city.imageUrl}
+                        alt=""
+                        className={styles.pinThumbImage}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className={styles.pinThumbFallback}>
+                        {city.flag || city.city.slice(0, 1)}
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.pinTriangle} />
+                </div>
+                <div
+                  className={styles.markerLabel}
+                  style={{
+                    transform: `translate(${offset.labelX}px, ${offset.labelY}px)`,
+                  }}
+                >
+                  {city.flag ? `${city.flag} ` : ''}
+                  {city.city}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

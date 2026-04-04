@@ -59,9 +59,18 @@ export interface StayCardProps {
   onUpdate: (id: string, changes: Partial<Stay>) => void;
   onDelete?: (id: string) => void;
   buddyNames?: string[];
+  onEdit?: (stay: Stay) => void;
 }
 
-export function StayCard({ stay, isSelected, onSelect, onUpdate, onDelete, buddyNames = [] }: StayCardProps) {
+export function StayCard({
+  stay,
+  isSelected,
+  onSelect,
+  onUpdate,
+  onDelete,
+  buddyNames = [],
+  onEdit,
+}: StayCardProps) {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState(100);
   const [showMap, setShowMap] = useState(false);
@@ -193,6 +202,14 @@ export function StayCard({ stay, isSelected, onSelect, onUpdate, onDelete, buddy
                 </a>
               ))}
             </div>
+          </div>
+        )}
+
+        {onEdit && (
+          <div className={styles.editRow} onClick={(e) => e.stopPropagation()}>
+            <Button type="button" variant="outline" size="xs" onClick={() => onEdit(stay)}>
+              Edit Stay
+            </Button>
           </div>
         )}
 

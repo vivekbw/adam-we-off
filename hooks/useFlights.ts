@@ -2,13 +2,17 @@
 
 import useSWR from 'swr';
 import { supabase } from '@/lib/supabase/client';
-import { SEED_FLIGHTS, type Flight } from '@/lib/constants';
+import { SEED_FLIGHTS, SEED_TRIP_ID, type Flight } from '@/lib/constants';
 import {
   mergeFlightSeatsPayload,
   splitFlightSeatsPayload,
 } from '@/lib/flights/travelers';
 
 const isSupabaseConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+
+function seedFlightsForTrip(tripId: string) {
+  return tripId === SEED_TRIP_ID ? SEED_FLIGHTS : [];
+}
 
 function toFlight(row: Record<string, unknown>): Flight {
   const r = row as Record<string, unknown>;
@@ -72,13 +76,13 @@ function sortFlights(list: Flight[]) {
 }
 
 async function fetchFlights(tripId: string): Promise<Flight[]> {
-  if (!isSupabaseConfigured || !supabase) return SEED_FLIGHTS;
+  if (!isSupabaseConfigured || !supabase) return seedFlightsForTrip(tripId);
   const { data, error } = await supabase
     .from('flights')
     .select('*')
     .eq('trip_id', tripId)
     .order('date');
-  if (error) throw error;
+  if (error) return seedFlightsForTrip(tripId);
   return (data ?? []).map(toFlight);
 }
 
@@ -86,10 +90,10 @@ export function useFlights(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR(
     `flights-${tripId}`,
     () => fetchFlights(tripId),
-    { fallbackData: SEED_FLIGHTS }
+    { fallbackData: seedFlightsForTrip(tripId) }
   );
 
-  const flights = data ?? SEED_FLIGHTS;
+  const flights = data ?? seedFlightsForTrip(tripId);
 
   const updateFlights = async (updated: Flight[]) => {
     mutate(updated, false);

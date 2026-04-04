@@ -277,6 +277,12 @@
   color: var(--color-primary);
 }
 
+.editRow {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-start;
+}
+
 .mapPlaceholder {
   margin-top: var(--space-3);
   padding: var(--space-6);
